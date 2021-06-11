@@ -1,0 +1,10 @@
+$pdf_mode = 1;
+set_tex_cmds( '--shell-escape -synctex=1 %O %S' );
+add_cus_dep( 'tex', 'aux', 0, 'makeexternaldocument' );
+
+sub makeexternaldocument {
+    if (!($root_filename eq $_[0]))
+    {
+        system( "latexmk -cd \"$_[0]\"" );
+    }
+}

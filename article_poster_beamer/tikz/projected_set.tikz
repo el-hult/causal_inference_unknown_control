@@ -1,0 +1,65 @@
+\pgfmathsetlengthmacro\sideWidth{3cm}
+\pgfmathsetlengthmacro\axisHeight{\pgfkeysvalueof{/figure/height}}
+\pgfmathsetlengthmacro\axisWidth{\pgfkeysvalueof{/figure/width}-\sideWidth}
+\begin{tikzpicture}
+\begin{axis}[
+    axis lines = left,
+    height=\axisHeight,
+    width=\axisWidth,
+    xlabel = $\semCoeffMat_{2,1}$,
+    ylabel = $\semCoeffMat_{1,2}$
+    ,xmin=-.1
+    ,xmax=2
+    ,ymin=-0.1
+    ,ymax=2
+    ,restrict y to domain=0:2
+]
+    \coordinate (wTrue) at (axis cs:1,0.5);
+
+
+    % The unconstrained problem
+    \draw[color=green_] (wTrue) ellipse [x radius=1*1.0, y radius=0.5*1.0];
+    \draw[color=green_] (wTrue) ellipse [x radius=1*0.8, y radius=0.5*0.8];
+    \draw[color=green_] (wTrue) ellipse [x radius=1*0.5, y radius=0.5*0.5];
+    \addlegendimage{color=green_}
+    \addlegendentry{$\En[\mEstLoss_{\semCoeffMat}(v)]$ level sets}
+
+    \node[label=$\semCoeffMat_\star$,circle,fill,inner sep=2pt] at (wTrue) {};
+
+    % the constraint is in 2D given by 
+    % theta1 = +- arccosh[ (epsilon/2)+1 ]/ theta2
+    % So in python, the following computes the constant
+    % In[1]: import math; eps = 1e-2; math.acosh((1e-2/2)+1)
+    % Out[1]: 0.09995838013869626
+    \addplot [
+        domain=0.000001:4, 
+        samples=400, 
+        color=black_,
+        name path global=hFunLine,
+        visible on=<2->
+        ]
+        {0.099/x};
+    \addlegendentry{$\hFun(\semCoeffMat)-\dagTolerance=0$}
+
+    \path[name path=axhline] (wTrue) -- +(0,-10cm);
+    \fill[uured,name intersections={of=axhline and hFunLine},visible on=<2->]
+        (intersection-1) circle(1mm) node[above left] {$\semCoeffEstN$};
+
+    % The tangent line is hand drawn on top
+    \draw[|-|,blue_,very thick,visible on=<3>] (axis cs:0.7,0.14) -- (axis cs:1.4,0.06);
+    %\addlegendimage{blue_, very thick}
+    %\addlegendentry{Confidence set for $\semCoeffEstN$}
+
+\end{axis}
+\coordinate (gammaLineBottom) at (\axisWidth,-1cm);
+\coordinate (gammaEstN) at ($(gammaLineBottom)+(0,\axisHeight/2)$);
+\draw[->] (gammaLineBottom) -- ++(0,\axisHeight);
+\fill[uured,visible on=<2->]
+      (gammaEstN)
+      circle(1mm) 
+      node[right] {$\averageCausalEffect(\semCoeffEstN)$};
+\draw[|-|,color=blue_,visible on=<3>, very thick]
+    ($(gammaEstN)-(0,1cm)$)
+    -- node[anchor=east]{$\averageCausalEffectSet_{\confidenceLevel,\nData}$}
+    ++(0,2cm);
+\end{tikzpicture}

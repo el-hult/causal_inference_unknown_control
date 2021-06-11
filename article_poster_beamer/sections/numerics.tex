@@ -1,0 +1,160 @@
+\section{Numerical Illustrations}
+\label{sec:numerics}
+
+In the following experiments, data was generated using a linear \scm{} \eqref{eq:sem:linear_sem} with a matrix $\semCoeffMat$ that is either fixed or random. For random \DAG{}-matrices, we follow \citet[section 4.1]{yu_daggnn_2019}: Let $\dNodes$ be the number of nodes in a \scm{}. Let $k$ be the expected number of edges in a randomly generated \DAG{}. Let $M$ be a random strictly subtriangular matrix where entries are drawn $\operatorname{Bernoulli}(2k/(\dNodes-1))$. Let $P$ be a random permutation matrix. Let $C$ be uniformly drawn from the interval $[0.5,2]$, and set $\semCoeffMat=P^\T (C\hadamard M) P$.
+
+The random vector $\semNoise$ in \eqref{eq:sem:linear_sem} has elements with unit variance and are drawn independently as either Normal(0,1), Exp(1) or Gumbel(0,$6/\pi^2$)). Data was also centered before any other processing.
+
+Throughout all runs, the nominal miscoverage level was set to $\confidenceLevel=5\%$ and $\dagTolerance=10^{-7}$.
+
+\begin{remark}
+     In the supplementary material, we study deviations from the linear data model, in which case the average causal effect \eqref{eq:def:averageCausalEffectTarget} of the optimal linear model is still defined.
+\end{remark}
+\begin{remark}
+     In all cases when the data generator is a linear \scm{} with Gaussian noise, we apply Isserlis' theorem to equation \eqref{eq:mest:score_variance}, $\En\left[ \semVector_i \semVector_q \semVector_o \semVector_k \right]-
+          \En\left[ \semVector_i \semVector_q \right]\En\left[ \semVector_o \semVector_k \right] =
+          \En\left[ \semVector_i \semVector_o \right]\En\left[ \semVector_q \semVector_k \right]
+          +\En\left[ \semVector_i \semVector_k \right]\En\left[ \semVector_q \semVector_o \right]
+     $. This reduction is especially helpful in high dimensions, when $\dNodes$ is large.
+\end{remark}
+
+\subsection{Numerical Search Method} \label{subsection:numerical_search}
+In the examples below, we construct the confidence interval \eqref{eq:confidence_set_for_ace} by numerically solving problem \eqref{eq:def:thetan}. Here we use the augmented Lagrangian method \citep{nocedal_numerical_2006}, but other search methods are possible as well.
+
+We define the augmented Lagrangian and the equality converted constraint as
+\begin{align}
+     \label{eq:def:augLag}
+     \augLag(\mEstParameter,\augLagSlack,\augLagLagMul, \augLagPen) = \En \left[ \mEstLoss_\mEstParameter(\semVector)\right] + \augLagLagMul \augLagContraint(\mEstParameter, \augLagSlack) + \frac{\augLagPen}{2}\augLagContraint(\mEstParameter, \augLagSlack)^2
+\end{align}
+\[\augLagContraint(\mEstParameter, \augLagSlack) = \hFun(\matop(L\mEstParameter))+\augLagSlack^2-\dagTolerance \]
+
+The method alternates between the minimization over primal variables ($\mEstParameter$,$\augLagSlack$) and maximization over dual variables ($\augLagLagMul$), starting from a few initialization points, as explicated in  Algorithm~\ref{algo:augLag}.
+
+\begin{algorithm}[ht!]
+     %\SetAlgoLined
+     \DontPrintSemicolon
+     \KwIn{$\mEstParameter^0$,$\augLagSlack^0$,$\augLagPen^0$, $\augLagLagMul^0$, $\augLagMinImprovement$, $\augLagPenMul$,$\augLag$,$\augLagConstraintTol$,$\augLagPenMax$,$\augLagContraint$}
+     \KwOut{$\mEstParameterEstN$ }
+     $k=0$\;
+     \nl\While{
+          $\augLagContraint(\mEstParameter^{\augLagIter}, \augLagSlack^{\augLagIter}) > \augLagConstraintTol$
+          \textbf{ and }
+          $\augLagPen < \augLagPenMax$
+          \label{algo:augLag:stopCondition}
+     }{
+          \nl$\mEstParameter^{k+1},\augLagSlack^{k+1} = \argmin_{\mEstParameter,\augLagSlack} \augLag(\mEstParameter,\augLagSlack,\augLagLagMul^\augLagIter, \augLagPen^\augLagIter)$\; \label{algo:augLag:inner_problem}
+          $\augLagLagMul^{\augLagIter+1} = \augLagLagMul^{\augLagIter} + \augLagPen^\augLagIter \augLagContraint(\mEstParameter^{\augLagIter+1}, \augLagSlack^{\augLagIter+1})$ \;
+          \eIf{
+               $\augLagContraint(\mEstParameter^{\augLagIter+1}, \augLagSlack^{\augLagIter+1}) >  \augLagMinImprovement \augLagContraint(\mEstParameter^{\augLagIter}, \augLagSlack^{\augLagIter})$
+          }{
+               $\augLagPen^{\augLagIter+1} =\augLagPenMul \augLagPen^{\augLagIter}$ \;
+          }{
+               $\augLagPen^{\augLagIter+1} = \augLagPen^{\augLagIter}$\;
+          }
+          $k=k+1$\;
+     }
+     \KwRet{$\mEstParameterEstN=\mEstParameter^{\augLagIter+1}$}\;
+     \caption{Augmented Lagrangian Method}
+     \label{algo:augLag}
+\end{algorithm}
+
+The minimization problem on line~\ref{algo:augLag:inner_problem} is solved via the L-BFGS-B-implementation in the python library \texttt{scipy.optimize}, which in turn utilizes the 3.0 version of the FORTRAN library of \citet{zhu_algorithm_1997}. Since this is a local minimizer, we use the previous optimal primal variables $\mEstParameter^{k},\augLagSlack^{k}$ as the starting point.
+
+The parameters have default values set to $\mEstParameter^0=0$, $\augLagSlack^0=10$, $\augLagPen^0=1$, $\augLagLagMul^0=0$, $\augLagMinImprovement=1/4$, $\augLagPenMul=2$, $\augLagConstraintTol=10^{-12}$, $\augLagPenMax = 10^{20}$. Note that $\augLagConstraintTol$ must be significantly smaller than $\dagTolerance$, which in turn should be smaller than $\dagToleranceMax$. Thus it is advisable to verify that the choice of $\augLagConstraintTol$ is sufficiently small in a given problem. The threshold $\augLagPenMax$ is introduced for numerical stability.
+
+The augmented Lagrangian method is guaranteed to find a local minimizer $\mEstParameterEstN$, under a certain set of assumptions \citep[Theorem 17.6]{nocedal_numerical_2006}. One of these is constraint qualification at the minimizer, in this case demanding $\nabla \augLagContraint(\mEstParameter_*,\augLagSlack_*) \neq 0$ at the optimal primal variables $\mEstParameter_*,\augLagSlack_*$. For $\dagTolerance=0$ this do not hold, but it does so for $\dagTolerance > 0$, see Lemma~\ref{lemma:nonconvexWset} in the supplementary material for a proof. Finding the minimum for $\dagTolerance \to 0$ will thus require $\augLagPen \to \infty$, and we have introduced the stop condition $\augLagPenMax$ on line~\ref{algo:augLag:stopCondition} for practical reasons.
+
+To compute $\averageCausalEffectTarget$ we replace $\En[..]$ in \eqref{eq:def:augLag} with $\E[..]$, which has a closed-form expression.
+
+
+\subsection{Baseline Comparison}
+\label{subsection:correctly_identify_adjustment}
+\label{subsection:same_as_ols}
+
+We first compare the proposed confidence interval $\averageCausalEffectSet_{\nData,\confidenceLevel}$ in \eqref{eq:confidence_set_for_ace} with a standard \OLS-based confidence interval $\regCoefficientSet_{\nData,\confidenceLevel}$ for \eqref{eq:partial_regression_coeff} that is computed using HC0 standard errors \citep{wooldridge_econometric_2010}. To use \OLS{} we must specify a set of control variables, which we take to be $\adjustmentVar$. When this set is valid, we expect $\averageCausalEffectSet_{\nData,\confidenceLevel}$ and $\regCoefficientSet_{\nData,\confidenceLevel}$ to be similar. When the set is invalid, we expect them to diverge.
+
+We use the linear Gaussian data model with the matrix in \eqref{eq:sem:linear_sem} set to be either
+\[\semCoeffMat '=\begin{bmatrix}
+          0 & 0 & 1 & 0 \\
+          0 & 0 & 1 & 0 \\
+          0 & 0 & 0 & 0 \\
+          1 & 1 & 0 & 0 \\
+     \end{bmatrix} \text{ or } \semCoeffMat '' = \begin{bmatrix} 0& 0.4& 0\\ 0& 0& 0 \\ 0.7 & 0.2& 0 \end{bmatrix} \]
+
+The graph of $\semCoeffMat '$ is illustrated in Figure~\ref{fig:collider_dag}, while Figure~\ref{fig:collider_asymptotics} demonstrates the ability of $\averageCausalEffectSet_{\nData,\confidenceLevel}$ to correctly infer $\averageCausalEffectTarget$ without specifying a set of control variables. By contrast, $\regCoefficientSet_{\nData,\confidenceLevel}$ is clearly biased from incorrectly controlling for the collider $\adjustmentVar_1$.
+
+Corresponding results for $\semCoeffMat ''$ are shown in Figure~\ref{fig:fork_asymptotics}. As expected, the resulting intervals $\averageCausalEffectSet_{\nData,\confidenceLevel}$ and $\regCoefficientSet_{\nData,\confidenceLevel}$ are virtually identical since $\adjustmentVar$ constitutes a valid set of control variables.
+\begin{figure}[htbp]
+     \centering
+     \input{tikz/3node_fork_chart.tikz}
+     \caption{$(1-\confidenceLevel)$-confidence intervals for $\averageCausalEffectTarget$ computed under a linear Gaussian \scm{} with matrix $\semCoeffMat ''$, for which $z$ is valid control variable.}
+     \label{fig:fork_asymptotics}
+\end{figure}
+
+
+
+\subsection{Calibration and Normality}\label{subsection:calibration}
+To assess the calibration of $\averageCausalEffectSet_{\confidenceLevel,\nData}$, we set $\nData$ to be $10^2$ or $10^4$ and generate repeated datasets from a linear Gaussian data model with matrix \[\semCoeffMat=\begin{bmatrix}
+          0 & -2  & 1.6 & 0    \\
+          0 & 0   & 0   & 0    \\
+          0 & 1.2 & 0   & -0.5 \\
+          0 & 0   & 0   & 0    \\
+     \end{bmatrix}\]
+corresponding to a graph illustrated in Figure~\ref{fig:calibration_dag}.
+\begin{figure}
+     \centering
+     \input{tikz/calibration_dag.tikz}
+     \caption{Causal structure of $\semCoeffMat$ in experiment for Calibration and Normality check, where $\adjustmentVar=[\adjustmentVar_1,\,\adjustmentVar_2]$ is  not a valid set of control variables.}
+     \label{fig:calibration_dag}
+\end{figure}
+
+The coverage probability $\Prob ( \averageCausalEffectTarget \in  \averageCausalEffectSet_{\alpha, \nData}  )$ was estimated to be $94.6 \%$ and $94.9\%$ for $\nData=10^2$ and $10^4$, respectively, using $1000$ Monte Carlo simulations. This is close to $1-\alpha=95\%$ and corroborates Theorem~\ref{thm:confidence_set_for_ace}.
+Figure~\ref{fig:calibration_qq} supports the result further by showing a Normality plot for the point estimate $\averageCausalEffectEstN$ over all Monte Carlo simulations.
+
+\begin{figure}[htbp]
+     \centering
+     \input{tikz/calibration_qq.tikz}
+     \caption{Normal probability plot for realizations of $\averageCausalEffectEstN$. Approximate normality is achieved even under moderate sample sizes.}
+     \label{fig:calibration_qq}
+\end{figure}
+
+\subsection{Comparison With a Causal Discovery Method}
+
+We compare our method with an alternative method of inferring the average causal effect by learning a linear \scm{} adjacency matrix $\semCoeffMat$ using DirectLiNGAM  \citep{shimizu_directlingam_2011, hyvarinen_pairwise_2013}. Then we can compute bootstrap confidence intervals, although they lack theoretical coverage guarantees. We used the official python implementation, version 1.5.1 from PyPI \url{https://pypi.org/project/lingam/1.5.1/}.
+
+We generate a random adjacency matrix $\semCoeffMat$ for a graph on $\dNodes=10$ nodes and $k=1$, but with the random seed set to the lowest nonnegative integer that yielded a nonzero $\averageCausalEffect$ to make the comparison interesting. We use $\nData=10^{4}$ observations.
+
+For LiNGAM, we computed the confidence interval (CI) using 100 bootstrap samples. For a comparable evaluation of its coverage, we considered the target quantity $\averageCausalEffectTarget$ to be the effect obtained when using LiNGAM with a large numbere of data points ($\nData'=10^6$). 100 Monte Carlo runs were used and the results are presented in Table~\ref{tab:lingam_compare}.
+
+\begin{table}
+     \centering
+     \caption{Comparison of empirical coverage rate (CR) and the average width of the Confidence Interval (CI) for LiNGAM Bootstrap CI and the CI $\averageCausalEffectSet_{\confidenceLevel,\nData}$ proposed in this article. The nominal CR was set to exceed $1-\alpha = 95\%$}\label{tab:lingam_compare}
+     \input{data/lingam_table}
+\end{table}
+
+The results show that when data is Gaussian, our proposed method yields both well-calibrated and tighter CIs, than LiNGAM method which has a very wide CI. This expected as LiNGAM was designed for non-Gaussian data. Indeed, for the non-Gaussian examples, LiNGAM produces tighter CIs but they all undercover. By constrast, our method produces more conservative CIs that do not undercover and yield consistent inferences.
+
+
+
+
+
+
+\subsection{Sensitivity with Respect to \DAG{} tolerance}
+\label{subsection:numerics:sensitivity}
+Let $\averageCausalEffectTarget(\dagTolerance)$ denote the average causal effect  \eqref{eq:def:averageCausalEffectTarget} when setting a specific value $\dagTolerance$ in \eqref{eq:def:semcoefftrue}. When data-generating process is given by a linear \scm  \eqref{eq:sem:linear_sem}, we have that the approximation gap $|\averageCausalEffect - \averageCausalEffectTarget(0)| = 0$, where $\averageCausalEffect$ is given by \eqref{eq:def:averageCausalEffectInSem}.
+The gap should decrease with $\dagTolerance$ such that ideally $\lim_{\dagTolerance \to 0} |\averageCausalEffect - \averageCausalEffectTarget(\dagTolerance)|=0$  and, moreover. An analytical study is, however, beyond the scope of the tools considered herein and we therefore resort to a numerical sensitivity study.
+
+First, we generate random \DAG{}-matrices $\semCoeffMat$. For every $\semCoeffMat$, we form the numerically approximation $\hat{\averageCausalEffectTarget}(\dagTolerance)$ by replacing $\En$ with the closed for expression for $\E$ in \eqref{eq:def:augLag}. In Figure~\ref{fig:epsilon-limit}, we illustrate the approximation gap $|\averageCausalEffect - \hat{\averageCausalEffectTarget}(\dagTolerance)|$. As expected the gap decreases sharply with $\dagTolerance$, until we reach finite precision effects arising mainly from the L-BFGS-B implementation.
+
+\begin{figure}
+     \centering
+     \input{tikz/dagtol_plot.tikz}
+     \caption{The error between $\averageCausalEffect$ \eqref{eq:def:averageCausalEffectInSem} for a randomly generated matrix $\semCoeffMat$ and the numerically evaluated $\hat{\averageCausalEffectTarget}(\dagTolerance)$ from \eqref{eq:def:averageCausalEffectTarget} and \eqref{eq:def:semcoefftrue}, over a range of $\dagTolerance$. Each solid line corresponds to the error for a randomly drawn matrix, with a corresponding value of $\dagToleranceMax$ shown as a vertical grey dashed line.
+          For $\dagTolerance \lesssim 10^{-7}$ the numerical precision of our numerical solver limits the precision of the results.
+     }
+     \label{fig:epsilon-limit}
+\end{figure}
+
+For some of the random matrices, we notice that when $\dagTolerance > \dagToleranceMax$ we obtain unreliable approximations. A more detailed discussion is provided in Section~\ref{subsection:extra_sensitivity} in the supplementary material.
+
+In the work of \citet{ng_ontheconvergence_2020}, it is shown that the convergence guarantees for augmented Lagrangian method do not hold and that its precision is finite as it terminates when the quadratic penalty $\rho$ approaches infinity --- in agreement both with our theoretical and experimental results.

@@ -1,0 +1,27 @@
+\begin{tikzpicture}[
+      ->,>=stealth',
+      shorten >=1pt,
+      auto,
+      semithick,
+      every node/.append style={color=black_},
+      every path/.append style={color=uumidgrey},
+      ]
+      \node[circle,draw, minimum size=20pt,font=\tiny] (Z2) at (2,2) { BMI};
+      \node[circle,draw, minimum size=20pt,color=green_] (X) at (-2,0) {\includegraphics[width=1cm]{figures/vitamin-icon-21420.png}};
+      \node[circle,draw, minimum size=20pt,color=uured] (Y) at (2,0) {\includegraphics[width=1cm]{figures/toppng.com-coronavirus-covid-19-icon-512x512.png}};
+      \node[circle,draw, minimum size=20pt] (Z1) at (-2,-2) {...};
+      \node[circle,draw, minimum size=20pt,font=\tiny,align=left] (BP) at (4,2) { Blood \\  Pressure};
+      \node[circle,draw, minimum size=20pt,font=\tiny,align=left] (GENDER) at (-3,3) { Gender };
+    
+      \path (Z1) edge node[above] {?} (X)
+      (Z1) edge node[above] {?}  (Y)
+      (X) edge node[above] {?}  (Z2)
+      (Z2) edge node[above] {?}  (Z1)
+      (X) edge[color=blue_] (Y)
+      (Y) edge node[above] {?}  (Z2)
+      (Y) edge node[above] {?}  (BP)
+      (Z2) edge node[above] {?}  (BP)
+      (GENDER) edge node[above] {?}  (X)
+      (GENDER) edge node[above] {?}  (Y)
+      (GENDER) edge node[above] {?}  (BP);
+    \end{tikzpicture} 

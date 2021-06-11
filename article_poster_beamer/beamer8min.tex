@@ -1,0 +1,282 @@
+\documentclass[aspectratio=1610]{beamer}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Theming
+\usetheme[progressbar=frametitle,numbering=fraction]{metropolis}
+\addtobeamertemplate{frametitle}{}{%
+\begin{textblock*}{100mm}(.85\textwidth,-1cm)
+\includegraphics[width=.65cm,trim={0 1.5cm 1.5cm 0}]{figures/UU_logo_vit.pdf}
+\end{textblock*}}
+
+\definecolor{black_}{RGB}{25, 25, 25}
+\definecolor{blue_}{RGB}{46,131,191}
+\definecolor{green_}{RGB}{46,191,106}
+\definecolor{uured}{RGB}{191,45,56}
+\definecolor{uudarkgrey}{RGB}{130,130,130}
+\definecolor{uumidgrey}{RGB}{190,190,190}
+\definecolor{uulightgrey}{RGB}{230,230,230}
+\setbeamercolor{alerted text}{fg=uured}
+\setbeamercolor{example text}{fg=green_}
+\metroset{block=fill}
+\usepackage{pgfplots}
+\pgfplotscreateplotcyclelist{myColorList}{%
+        color=blue_,every mark/.append style={fill=blue_},mark=*\\%
+        color=uured,every mark/.append style={fill=uured},mark=square*\\%
+        color=green_,every mark/.append style={fill=green_},mark=otimes*\\%
+        color=black_,every mark/.append style={fill=black_},mark=diamond*\\%
+    }
+\pgfplotsset{every axis/.append style={cycle list name=myColorList}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\usepackage[most]{tcolorbox}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{positioning}
+\usetikzlibrary{calc}
+\usetikzlibrary{intersections}
+\usepackage{pgfplots}	
+\pgfplotsset{compat=1.17}
+\usepackage{textpos}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{booktabs}
+
+% https://tex.stackexchange.com/questions/146908/beamer-overlay-specifications-for-a-tikzpicture
+\tikzset{
+    invisible/.style={opacity=0,text opacity=0},
+    visible on/.style={alt={#1{}{invisible}}},
+    alt/.code args={<#1>#2#3}{%
+      \alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}} % \pgfkeysalso doesn't change the path
+    },
+  }
+
+
+\usepackage{biblatex}
+\addbibresource{hult_502.bib}
+
+\let\definition\relax
+\input{sections/custom_commands.tex}
+\newcommand{\blueGamma}{\textcolor{blue_}{\averageCausalEffectSet_{\confidenceLevel, \nData}}}
+
+\title{Inference of Causal Effect when Control Variables are Unknown}
+\author{Ludvig Hult and Dave Zachariah}
+%\institute{37th Conference on Uncertainty in Artificial Intelligence}
+\institute{Department of Information Technology, Uppsala University, Sweden}
+\date{2021}
+\titlegraphic{\flushright\includegraphics[width=.1\textwidth]{figures/UU_logo.pdf}}
+
+\begin{document}
+
+\frame{\titlepage}
+
+%
+% MOTIVATION
+%
+\section{Intro}
+\begin{frame}{Example: Observational Study (inspired by \cite{luoca_2021})}
+    \centering
+    \input{tikz/covid_dag.tikz}
+\end{frame}
+\begin{frame}{Our contribution}
+    \centering
+    \begin{tcolorbox}[width=10cm]
+        We propose a method to get \textbf{valid confidence intervals} for the causal effect parameter when the \textbf{control variabels are unknown}.
+    \end{tcolorbox}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Problem Setup}
+\begin{frame}{Interventional data distribution and CEP}
+If we intervene on $\decisionVar$ in a system, we observe outcome $\outcomeVar$, they are distributed as the \textbf{interventional distribution}
+\[(\decisionVar,\outcomeVar)  \sim \interventionalDistribution(\outcomeVar | \decisionVar) \interventionalDistribution(\decisionVar) \]
+\[\Eint[x]=\Eint[y]=0\]
+\pause
+Can we infer the \textbf{causal effect parameter (CEP)}
+\begin{align*}
+\averageCausalEffect =   \argmin_{\bar{\averageCausalEffect}} \; \Eint\left[ \big( \Eint[\outcomeVar|\decisionVar]  - \bar{\averageCausalEffect}\decisionVar \big)^2 \right]
+\end{align*}
+using only observational data?
+\end{frame}
+
+\begin{frame}{Observational Data Distribution: Linear Additive Causal model}
+    
+    \[\semVector = \semCoeffMat^\T\semVector + \semNoise,\]
+    \[\E[\semNoise]=0 \quad \var[\semNoise] = \semNoiseCovariance \text{ diagonal and known} \]
+    \[v^T{}=(x,y,z_1,z_2,...z_{d-2})^T{}\]
+\pause
+    where
+\begin{itemize}
+    \item matrix $\semCoeffMat$ specifies a directed graph $\mathcal G$
+    \item we call $\semCoeffMat$ a $\DAG$-matrix if $\mathcal G$ is a acyclic
+    \item we consider only DAGs; $W_{i,i}=0 \, \forall i$ is necessary
+\end{itemize}
+\pause
+For this model $\averageCausalEffect(\semCoeffMat)$ has a \textbf{closed form expression}.
+\end{frame}
+
+\begin{frame}{$\dagTolerance$-almost DAGs}
+From the \emph{DAGs with NO TEARS} paper \cite{zheng_dags_2018}, we know that 
+\[ h(W) \coloneqq \tr \exp (\semCoeffMat \hadamard \semCoeffMat)-\dNodes\]
+\[ \hFun(\semCoeffMat) =0 \Leftrightarrow \semCoeffMat \text{ is \DAG-matrix}  \]
+\pause
+We introduce $\dagTolerance$-almost \DAG{}-matrices, defined as
+\begin{align*}
+\label{eq:def:semCoeffMatSet}
+\semCoeffMatSet_\dagTolerance = \left\{ \semCoeffMat\, \middle| \hFun(\semCoeffMat) \leq \dagTolerance  \text{ and } \diag(\semCoeffMat)=0 \right\}
+\end{align*}
+\end{frame}
+
+\begin{frame}{Target Quantity and Problem Statement}
+\begin{columns}
+    \begin{column}{0.8\textwidth}
+        \begin{equation*}
+            \semCoeffOpt \coloneqq \argmin_{\semCoeffMat \in \semCoeffMatSet_\dagTolerance} \; \E\Big[ \norm{\semNoiseCovariance^{-1/2}  \left(\eye - \semCoeffMat^\T \right)\semVector }^2 \Big] 
+        \end{equation*}
+        \begin{equation*}
+            \textcolor{uured}{\averageCausalEffectTarget} = \averageCausalEffect(\semCoeffOpt)
+        \end{equation*} 
+        \uncover<2->{
+        \begin{block}{Problem Statement}
+            Construct a confidence interval $\blueGamma$
+            for \textcolor{uured}{$\averageCausalEffectTarget$}, that covers with probability $1-\confidenceLevel$, using $\nData$ data points?
+        \end{block}
+        }
+    \end{column}
+    \begin{column}{0.2\textwidth}
+        \begin{tikzpicture}
+            \draw[->] (0,0) -- (0,3);
+            \node at (0,2) [circle,fill=black,label=right:$\averageCausalEffect$,inner sep=1pt] {};
+            \node[text=uured] at (0,2.2) [circle,fill=uured,label=right:{\textcolor{uured}{$\averageCausalEffectTarget$}},inner sep=1pt] {};
+            \draw[|-|,color=blue_,visible on=<2->]
+                (0,0.7) 
+                -- node[anchor=south west]{$\averageCausalEffectSet_{\confidenceLevel,\nData}$}
+                +(0,1.6);
+        \end{tikzpicture}
+    \end{column}
+    \end{columns}
+\uncover<3->{
+Assuming unicity of $\semCoeffOpt$. For $\dagTolerance=0$, there is a unique solution, by \cite{loh_high-dimensional_2014}. For $\dagTolerance>0$ it is an open problem.
+}
+\end{frame}
+
+
+
+
+\section{Results}
+
+\begin{frame}{CI Formulation}
+\begin{theorem}[Theorem 4]
+    There is a CI $\blueGamma$ with coverage
+    \begin{equation*}
+    \lim_{\nData \rightarrow \infty} \: \Prob ( \averageCausalEffectTarget \in  \blueGamma  ) = 1 - \alpha,
+    \end{equation*}
+        given by
+            \begin{align*}
+            \blueGamma  = \left\{ \averageCausalEffect \in \R \middle|\frac{1}{\nData} \frac{ (\averageCausalEffect - \averageCausalEffect(\semCoeffEstN))^2}
+            {  \nabla \averageCausalEffect(\semCoeffEstN)^\T\mEstCovarianceN \nabla \averageCausalEffect(\semCoeffEstN)}  \leq \chi^2_{1,\confidenceLevel}  \right\}
+        \end{align*}
+        has asymptotic coverage probability
+    where $\chi^2_{1,\confidenceLevel}$ denotes the $(1-\alpha)$ quantile of the chi-squared distribution with 1 degree of freedom, and 
+    $\mEstCovarianceN$ is a Fisher information, projected onto the constraint set.
+    \label{thm:confidence_set_for_ace}
+    \end{theorem}
+    \note{Wald kind of statistic}
+\end{frame}
+
+
+\begin{frame}{CI by Projection: 2D Case}
+
+    \begin{figure}
+        \pgfkeyssetvalue{/figure/width}{10cm}
+        \pgfkeyssetvalue{/figure/height}{5cm}
+        \input{tikz/projected_set.tikz}
+        \caption{
+            Illustration of Projection Method, when $\dNodes=2$. 
+            In that case $\semCoeffMat=\begin{bmatrix}0&\semCoeffMat_{1,2}\\\semCoeffMat_{2,1} & 0 \end{bmatrix}$. When $\dagTolerance \geq \dagToleranceMax$ $\semCoeffEstN = \semCoeffMat_\star$
+            }
+    \end{figure}
+\end{frame}
+
+
+\begin{frame}{Sanity Checks}
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \input{tikz/3node_fork_graph.tikz}
+        \caption{Underlying causal structure}
+        \label{fig:fork_dag}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \input{tikz/3node_fork_chart.tikz}
+        \caption{$95\%$-confidence intervals that aim to cover $\averageCausalEffectTarget$. $\blueGamma$ is CI for our method. $\regCoefficientSet_{\confidenceLevel,\nData}$ is HC0 CI for OLS.}
+        \label{fig:fork_asymptotics}
+    \end{subfigure}
+    \hfill
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Sanity Checks}
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \tikzset{node distance=2.3cm}
+        \input{tikz/4node_collider_graph.tikz}
+        \caption{Underlying causal structure. All edges has value 1.}
+        \label{fig:collider_dag}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.45\textwidth}
+        \centering
+        \pgfplotsset{every axis/.append style={width=\columnwidth, height=.6\columnwidth}}
+        \input{tikz/4node_collider_chart.tikz}
+        \caption{$95\%$-confidence intervals that aim to cover $\averageCausalEffectTarget$.
+        $\blueGamma$ is CI for our method. $\regCoefficientSet_{\confidenceLevel,\nData}$ is HC0 CI for OLS.}
+        \label{fig:collider_asymptotics}
+    \end{subfigure}
+    \hfill
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Compare with LiNGAM\cite{shimizu_directlingam_2011, hyvarinen_pairwise_2013}}
+\begin{table}
+    \centering
+    \caption{Empirical coverage rate (CR) and the average Confidence Interval (CI) width for LiNGAM Bootstrap CI and $\averageCausalEffectSet_{\confidenceLevel,\nData}$ proposed in this article. The nominal CR was set to exceed $1-\alpha = 95\%$.}\label{tab:lingam_compare}
+    \input{data/lingam_table}
+\end{table}
+\end{frame}
+
+\section{Conclusions}
+
+\begin{frame}{Conclusions}
+    \begin{itemize}[<+->]
+        \item We derive \textbf{valid confidence interval} under \textbf{unknown control variables}
+        \item Assumptions rests on \textbf{no hidden confounding} -- known diagonal latent covariance
+        \item Constrained risk minimization asymptotics derived by \textbf{projection technique}
+        \item Numerical verifications shows \textbf{valid intervals} where DirectLiNGAM fails
+        \item \textbf{Open questions} on identifiability - numerical experiments are promising
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{References}
+    \printbibliography[heading=none]
+\end{frame}
+
+\begin{frame}{Contact}
+    \textbf{Ludvig Hult, Uppsala University}\\
+    \texttt{ludvig.hult@it.uu.se}\\
+    \texttt{ludvig.hult@gmail.com}\\
+    \url{https://twitter.com/el_hult}\\
+    \url{https://github.com/el-hult}
+\end{frame}
+
+\end{document}

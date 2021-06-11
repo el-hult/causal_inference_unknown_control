@@ -1,0 +1,10 @@
+# IDE config
+.vscode
+
+# output and submissions
+output
+submissions
+
+# compiled stuff
+*.egg-info
+__pycache__

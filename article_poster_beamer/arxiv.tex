@@ -1,0 +1,63 @@
+\pdfoutput=1 % signals to arXiv to use pdflatex instead of latex+ps2pdf
+\documentclass[twocolumn]{article}
+\usepackage[american]{babel}
+
+\usepackage[paper=a4paper,margin=1.5cm]{geometry}
+\setlength{\columnsep}{0.5cm}
+\usepackage{hyperref}
+\usepackage{natbib}
+    \bibliographystyle{plainnat}
+    \renewcommand{\bibsection}{\subsubsection*{References}}
+\usepackage{mathtools}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{pgfplots}	
+\pgfplotsset{compat=1.17}
+\usetikzlibrary{arrows}
+\usepgfplotslibrary{fillbetween}
+\usepackage{subcaption}
+
+\input{sections/custom_commands.tex}
+\theoremstyle{plain}
+\newcounter{thm}
+\newtheorem{theorem}[thm]{Theorem}
+\newtheorem{lemma}[thm]{Lemma}
+\newtheorem{corollary}[thm]{Corollary}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+
+
+\title{Inference of Causal Effects when Control Variables are Unknown}
+\author{ Ludvig Hult\\Uppsala University \and Dave Zachariah\\Uppsala University }
+\date{}
+
+\begin{document}
+\maketitle
+
+\input{sections/abstract}
+\input{sections/introduction}
+\input{sections/problem_formulation}
+\input{sections/results}
+\input{sections/numerics}
+\input{sections/conclusion}
+
+\subsubsection*{Contributions}
+    Ludvig~Hult made the numerical simulations, the theoretical derivations and typeset the technical parts as well as produced all figueres and diagram.
+    All code is due to Ludvig~Hult.
+
+    Dave~Zachariah concieved the idea, guided the work and supported the article authoring.
+
+\subsubsection*{Acknowledgements}
+    This work was partly supported by the Swedish Research Council under contract 2018-05040  and the \emph{Wallenberg AI, Autonomous Systems and Software Program (WASP)} funded by Knut and Alice Wallenberg Foundation.
+
+\bibliography{hult_502}
+
+\clearpage
+\onecolumn
+\input{sections/suppl_mat}
+
+\end{document}

@@ -1,0 +1,30 @@
+\begin{tikzpicture}[baseline]
+    \pgfplotstableread[col sep=comma]{./data/dagtol_pgfplots.csv}{\datatable};
+    \begin{axis}[
+        width=\columnwidth,
+        height=.6\columnwidth,
+        xlabel={$\dagTolerance$},
+        ylabel={$|{\averageCausalEffect - \hat{\averageCausalEffectTarget}(\dagTolerance)}|$},
+        xmode=log,  
+        ymode=log,
+        legend style={font=\scriptsize},
+        xmin=1e-9,
+        xmax=1e2,
+    ]
+    \foreach \y in {
+1.1392723396082403
+,0.1937917407495311
+,1.285846198734098
+,1.1420203278694752
+,0.2970456915441977
+,1.5075613943267605
+,1.5455653003752525
+,0.9413888160321484
+,0.6245695864066603
+,1.750413866544636
+        }
+        \addplot +[mark=none,gray,dashed,thick] coordinates {(\y, 1e-8) (\y, 1e0)};
+    \foreach \k in {0,1,...,9}
+        \addplot [mark=none,color=black] table [x=dag_tolerance, y=ace_abs_err-\k] {\datatable};
+    \end{axis}
+\end{tikzpicture}

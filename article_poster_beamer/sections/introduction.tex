@@ -1,0 +1,71 @@
+\section{Introduction}
+When applied researchers aim to assess the causal effect of some policy or exposure, they must often infer it from observational data. This requires controlling for variations in the outcome of interest that arise from confounding factors. After selecting a set of control variables, inferences are often drawn using regression models. But selecting a valid control variable set is in general hard and the use of invalid sets produces misleading inferences, see. e.g., \citet{carlson_illusion_2012,berneth_acritical_2016}. It is therefore of practical interest to infer causal effects without relying on the researcher to specify the control variables among all observed variables. 
+
+In this paper, we will develop such an inferential method under the assumption that there is no unobserved confounding. The method infers average causal effects using asymptotic confidence intervals and obviates the need for specifying control variables.
+ 
+Consider a random outcome variable $\outcomeVar$ observed after an intervention on another scalar $\decisionVar$. We denote the unknown conditional distribution of outcomes under such an intervention as
+\[\outcomeVar \sim \interventionalDistribution(\outcomeVar | \decisionVar)\]
+We consider the scalars $\decisionVar$ and $\outcomeVar$ to be of zero mean, i.e. $\Eint[x]=\Eint[y]=0$, where the tilde denotes that the expectation is taken with respect to the interventional distribution $\interventionalDistribution$.
+The conditional mean function $\Eint[\outcomeVar|\decisionVar]$ describes the effect of the intervention and can be summarized by the distribution parameter
+\begin{align}
+\boxed{\averageCausalEffect \coloneqq \: \frac{\covint[\decisionVar,  \outcomeVar]}{\varint[\decisionVar]} \; \equiv \;  \argmin_{\bar{\averageCausalEffect}} \; \Eint\left[ \big( \Eint[\outcomeVar|\decisionVar]  - \bar{\averageCausalEffect}\decisionVar \big)^2 \right]}
+\end{align}
+Thus $\averageCausalEffect \decisionVar$ is an optimal linear approximation of the conditional mean function. When the conditional mean function is linear, the parameter is the average causal effect of the intervention, i.e., $\averageCausalEffect \equiv \frac{\partial}{\partial \decisionVar } \Eint[\outcomeVar|\decisionVar]$  \citep{angrist_mostly_2009,pearl_causality:_2009}.
+
+The task is to infer $\averageCausalEffect$ using data from a different, \emph{observational} distribution
+\begin{align}
+\label{eq:dataGeneratingProcess}    
+ (\decisionVar_i, \outcomeVar_i, \adjustmentVar_i) \sim \observationalDistribution(\decisionVar, \outcomeVar, \adjustmentVar),\quad i=1, \dots, \nData 
+\end{align}
+where $\adjustmentVar$ is a vector of additional random variables. A standard procedure to infer $\averageCausalEffect$ is to use the partial regression coefficient
+\begin{equation} \label{eq:partial_regression_coeff}
+    \begin{split}
+    \regCoefficient \coloneqq  \frac{\cov[\adjusted{\decisionVar},  \adjusted{\outcomeVar}]}{\var[\adjusted{\decisionVar}]},
+    \end{split}
+\end{equation}
+where $\adjusted{\decisionVar}$ and $\adjusted{\outcomeVar}$ are adjusted according to 
+\begin{equation}
+\begin{split}
+     \bar{\decisionVar} &\coloneqq \decisionVar - \cov[\decisionVar,  \validAdjustmentVar]\cov[\validAdjustmentVar]^{-1}\validAdjustmentVar \\
+\bar{\outcomeVar} &\coloneqq \outcomeVar - \cov[\outcomeVar,  \validAdjustmentVar]\cov[\validAdjustmentVar]^{-1}\validAdjustmentVar,
+\end{split}
+\end{equation}
+where $\validAdjustmentVar \subseteq \adjustmentVar$ is a set of \emph{control variables} using the terminology in much of regression analysis. If this set were \emph{valid}, the noncausal association between $\decisionVar$ and  $\outcomeVar$ can be blocked. Then $\regCoefficient = \averageCausalEffect$ when the data-generating process is well-described by a linear model \citep{angrist_mostly_2009,pearl_causality:_2009}. See \citep[ch.~6.6]{peters_elements_2017} for a general definition of valid  control variables using structural causal models (\scm). Throughout the paper, we will assume that at least one valid subset of $\adjustmentVar$ exists but that it is \emph{unknown}. If a specified $\validAdjustmentVar$ contains invalid controls, the resulting inferences become erroneous as the following example illustrates.
+
+\begin{figure*}[ht!]
+     \centering
+     \begin{subfigure}[b]{0.45\textwidth}
+         \centering
+         \tikzset{node distance=2.3cm}
+         \input{tikz/4node_collider_graph.tikz}
+         \caption{Underlying causal structure}
+         \label{fig:collider_dag}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.45\textwidth}
+         \centering
+        \pgfplotsset{every axis/.append style={width=\columnwidth, height=.6\columnwidth}}
+         \input{tikz/4node_collider_chart.tikz}
+         \caption{$95\%$-confidence intervals that aim to cover $\averageCausalEffectTarget$}
+         \label{fig:collider_asymptotics}
+     \end{subfigure}
+     \hfill
+     \caption{Using observational data \eqref{eq:dataGeneratingProcess} generated by a linear \scm{} based on (a), we aim to infer an unknown causal parameter $\averageCausalEffectTarget$ (further details in Section~\ref{subsection:correctly_identify_adjustment}).
+     The causal structure is here unknown and using $\adjustmentVar=[\adjustmentVar_1 ,\, \adjustmentVar_2]$ as the control variables, the standard approach based on the ordinary least-squares (\OLS) method yields confidence interval $\regCoefficientSet_{\confidenceLevel,\nData}$ in (b). Since $\adjustmentVar$ is invalid
+     due to the collider bias induced by $\adjustmentVar_1$, the inferences are erroneous.
+     Below we develop an inference method that yields calibrated confidence intervals $\averageCausalEffectSet_{\confidenceLevel,\nData}$ when the causal structure in (a), and therefore a set of valid control variables, is unknown.}
+\end{figure*}
+
+\paragraph{Example: Invalid control variables} 
+Consider a data-generating process with a causal structure as illustrated in Figure~\ref{fig:collider_dag}. Only $\adjustmentVar_2 \subset \adjustmentVar$ constitutes  a valid control variable, by blocking the noncausal association between $\decisionVar$ and $\outcomeVar$. Neither $\varnothing$ nor $\adjustmentVar_1$ are valid. If the causal structure is unknown or misspecified so that we use $\validAdjustmentVar = [\adjustmentVar_1, \adjustmentVar_2]^\T$ instead of $\adjustmentVar_2$, then inferring $\regCoefficient$ in equation \eqref{eq:partial_regression_coeff} will yield erroneous conclusions about the average causal effect, as shown in Figure~\ref{fig:collider_asymptotics}. We also illustrate an alternative methodology developed in this paper which, by contrast, does not require a correctly specified causal structure.
+
+\paragraph{Contribution and related work} The contribution of this paper is the development of a confidence interval for the average causal effect that obviates the need to specify valid control variables, and we derive its statistical properties.
+
+To decide the valid control variables among $\adjustmentVar$, typically requires the causal structure of the data-generating process. The problem of learning such structures from data, aka. causal discovery, has been studied over a few decades \citep{spirtes_causation_1993, pearl_causality:_2009,peters_elements_2017}. A central challenge of the field is to optimize model fitness over the discrete nature of graphs representing the causal structure. \citet{zheng_dags_2018} proposed a smooth characterization of directed acyclic graphs (\DAG{}) which enables conventional optimization methods to be used. See \citep{yu_daggnn_2019,ke_learning_2019,brouillard_diffrential_2020,zheng_learning_2020,kyono_2020} for applications and extentions of this methodology. 
+
+Our method presented herein utilizes that characterization of \DAG{}s and builds upon the  framework of M-estimation. See e.g. the presentation in \citep[ch. 12]{wooldridge_econometric_2010} or \citet{vaart_m-_1998} for an introduction. 
+When imposing \DAG{}-constraints, we find the need to extend the basic M-estimation framework. While the theory of constrained M-estimation has been approached before \citep{geyer_asymptotics_1994,shapiro_asymptotics_2000,andrews_estimation_1999, wang_asymptotics_1996}, we show that the assumptions needed do not hold due to the geometry of the  \DAG{} constraints. Moreover, alternative characterizations of \DAG{}s, presented in  \citet{wei_dags_2020}, would not remedy this problem.
+
+Therefore we take a different approach, inspired by \citet{stoica_cramer-rao_1998}, to derive the large-sample properties of the proposed confidence interval and prove its asymptotic validity. Our theoretical results are corroborated by numerical experiments, which demonstrate the ability of the method to correctly infer average causal effects in linear \scm{}s without specifying valid control variables.
+
+Lastly we emphasize that while our method builds upon insights from the causal discovery literature, its task is to infer the average causal effect and not a causal graph.

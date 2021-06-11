@@ -1,0 +1,72 @@
+
+\section{Problem Formulation}
+
+We begin by specifying the class models for the data generating process that we will consider and then proceed to define the target quantity that we seek to infer from data.
+
+\subsection{Model Class for the Data-Generating Process}
+
+To simplify the notation, we introduce the $\dNodes$-dimensional data vector $\semVector^\T = (\decisionVar ,\, \outcomeVar ,\, \adjustmentVar^\T)$. Suppose the data-generating process $p(\semVector)$ in \eqref{eq:dataGeneratingProcess} belongs to the class of linear \scm. That is, we can express the data vector as
+\begin{align}
+    \label{eq:sem:linear_sem}
+    \semVector = \semCoeffMat^\T\semVector + \semNoise,
+\end{align}
+where is $\semNoise$ is zero-mean random variable with a diagonal covariance matrix $\semNoiseCovariance$. It is for simplicity assumed to be known here, although as we point out in Section~\ref{sec:result} this assumption can be relaxed to a certain degree.  We let $\semCoeffMat\in \R^{\dNodes\times\dNodes}$ have zeros on its diagonal. It can be interpreted as a weighted directed graph, by letting $W_{i,j}$ be the weight on the edge from node $i$ to node $j$.
+The matrix $W^\T$ is sometimes referred to as the \emph{adjacency matrix} \citep{shimizu_directlingam_2011} or the \emph{autoregressive matrix} \citep{loh_high-dimensional_2014}.
+
+The matrix $\semCoeffMat$ is unknown but has certain restrictions. For \scm{}s it is common to impose a \DAG{} structure on the graph specified by $\semCoeffMat$, since such structure significantly clarifies and simplifies any causal analysis of the model.
+%While the acyclic constraint is strong and not always realistic, it is often justified to be possible by unwrapping cyclical structures into acyclical ones. \citep{halpern_causes_2005} Thus, a \DAG{} model should always be possible under inclusion of all relevant variables. 
+We will call $\semCoeffMat$ a `\DAG{}-matrix' if the directed graph of the matrix is acyclical.
+When $\semCoeffMat$ is a \DAG{}-matrix, we can interpret the entry $\semCoeffMat_{i,j}$ as the expected increase in $\semVector_i$ for every unit increase in $\semVector_j$, holding all other variables constant.
+
+\citet{zheng_dags_2018} introduced the function $h(W) \coloneqq \tr \exp (\semCoeffMat \hadamard \semCoeffMat)-\dNodes$, using the trace of the matrix exponential and the element-wise product $\hadamard$, and showed that
+\[ \semCoeffMat \text{ is \DAG-matrix} \Leftrightarrow \hFun(\semCoeffMat) =0\]
+To enable a tractable analysis below, we will also consider the set of all $\dagTolerance$-almost \DAG{}-matrices, defined as
+\begin{align}
+    \label{eq:def:semCoeffMatSet}
+    \semCoeffMatSet_\dagTolerance = \left\{ \semCoeffMat\, \middle| \hFun(\semCoeffMat) \leq \dagTolerance  \text{ and } \diag(\semCoeffMat)=0 \right\}
+\end{align}
+Note that when $\dagTolerance=0$, the set  $\semCoeffMatSet_0$ is exactly the set of \DAG-matrices.
+When $\dagTolerance > 0$, cycles are permitted but the magnitude of their effects are bounded. Below we will provide bounds on $\dagTolerance$ that enable a meaningful analysis of $\semCoeffMatSet_\dagTolerance$.
+
+Given the data-generating process in \eqref{eq:sem:linear_sem}, we can define an \emph{interventional} distribution $\widetilde{p}(\semVector)$ with respect to the first variable $\decisionVar$ \citep{pearl_causality:_2009}:
+Introduce $\mutilatingMatrix$, a matrix with ones on the diagonal, except the first element, which is zero, i.e.
+\begin{equation}\label{eq:def:mutilatingMatrix}
+    Z \in \R^{\dNodes\times\dNodes},\quad \mutilatingMatrix_{i,j} = \begin{cases} 1& \text{if } i=j>1\\ 0 &\text{else}\end{cases}
+\end{equation}
+Next, introduce a new random vector $\semInterventionNoise $, with the same statistical properties as $\semNoise$ in \eqref{eq:sem:linear_sem} for all components, but for its first component, and let $\semInterventionNoiseCovariance$ denote its diagonal covariance matrix.
+The interventional distribution $\widetilde{p}(\semVector)$ is then specified by the model
+\begin{align}
+    \label{eq:mutilated_dgp}
+    \semVector = \mutilatingMatrix \semCoeffMat^\T \semVector +  \semInterventionNoise ,
+\end{align}
+assuming that $(\eye - \mutilatingMatrix \semCoeffMat^\T )$ is full rank.
+
+
+
+\subsection{Target Quantity}
+
+For an interventional distribution given by \eqref{eq:mutilated_dgp}, we observe the following result.
+\begin{lemma}
+    \label{lemma:averageCausalEffectInSem}
+    The average causal effect of $\decisionVar$ on $\outcomeVar$ in a linear \scm{} with interventional distribution $\widetilde{p}(\semVector)$ is
+    \begin{equation}
+        \label{eq:def:averageCausalEffectInSem}
+        \averageCausalEffect(\semCoeffMat) = \frac{\covint[\decisionVar,  \outcomeVar]}{\varint[\decisionVar]} \equiv \left[ (\eye - \mutilatingMatrix \semCoeffMat^\T )^{-1} \right]_{2,1}
+    \end{equation}
+    where $\semCoeffMat$ is a (possibly non-\DAG{}) adjacency matrix.
+\end{lemma}
+The syntax $[.]_{2,1}$ refers to the second row and first column of a matrix. The proof is a direct computation and given in the supplementary material.
+
+We are interested in computing the average causal effect
+\begin{subequations}
+    \begin{equation}\label{eq:def:averageCausalEffectTarget}
+        \boxed{\averageCausalEffectTarget = \averageCausalEffect(\semCoeffOpt),}
+    \end{equation}
+    where $\semCoeffOpt$ is an $\dagTolerance$-almost \DAG{} adjacency matrix that optimally fits the observational data using the following criterion,
+    \begin{equation}\label{eq:def:semcoefftrue}
+        \semCoeffOpt \coloneqq \argmin_{\semCoeffMat \in \semCoeffMatSet_\dagTolerance} \; \E\Big[  \norm{\semNoiseCovariance^{-1/2}  (\eye - \semCoeffMat^\T)\semVector }^2 \Big]
+    \end{equation}
+\end{subequations}
+\citet[corollary~8]{loh_high-dimensional_2014} show that if the observational distribution $p(\adjustmentVar)$ follows \eqref{eq:sem:linear_sem} and $\dagTolerance=0$, then \eqref{eq:def:semcoefftrue} correctly identifies the unknown matrix. Moreover, \citet[theorem~9]{loh_high-dimensional_2014} proves that identifiability is obtained even under limited misspecification of the entries in $\cov[\semNoise] = \semNoiseCovariance$. Thus the target quantity $\averageCausalEffectTarget$ is defined as the average causal effect of the optimally fitted linear \scm{} and requires no further distributional assumptions.
+
+Our task is to construct a confidence interval $\averageCausalEffectSet_{\alpha,\nData}$, that is using $\nData$ data points, and has a coverage probability $1-\confidenceLevel$ for the quantity $\averageCausalEffectTarget$.

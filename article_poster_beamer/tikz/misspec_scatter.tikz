@@ -1,0 +1,12 @@
+\begin{tikzpicture}[baseline]
+        \pgfplotstableread[col sep=comma]{./data/misspec_scatter.csv}\datatable
+    \begin{axis}[%
+        ,xlabel=$\misspecCond$
+        ,ylabel=$\averageCausalEffectTarget$
+        ,xmin=1
+        ,xmax=4
+        ]
+        \addplot+[only marks, mark=x, mark options={scale=0.6,color=black}] table [x=condition, y=ace_circ]{\datatable};
+        \addplot[no marks, samples=2, black, dashed] {0.92};
+    \end{axis}
+\end{tikzpicture}

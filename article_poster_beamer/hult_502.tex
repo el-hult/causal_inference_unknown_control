@@ -1,0 +1,112 @@
+% \documentclass{uai2021} % for initial submission
+\documentclass[accepted]{uai2021} % after acceptance, for a revised
+                                    % version; also before submission to
+                                    % see how the non-anonymous paper
+                                    % would look like
+% NOTE: Only comment/uncomment the lines above as appropriate,
+%       as they will be replaced automatically for papers to be published.
+%       Do not make any other change above this note for an accepted
+%       version.
+
+%% Choose your variant of English; be consistent
+\usepackage[american]{babel}
+
+\usepackage{natbib} % has a nice set of citation styles and commands
+    \bibliographystyle{plainnat}
+    \renewcommand{\bibsection}{\subsubsection*{References}}
+\usepackage{mathtools} % amsmath with fixes and additions
+\usepackage{booktabs} % commands to create good-looking tables
+\usepackage{tikz} % nice language for creating drawings and diagrams
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage{pgfplots}	
+\pgfplotsset{compat=1.17}
+\usetikzlibrary{arrows}
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=tikz_external/]
+\usepgfplotslibrary{fillbetween}
+\usepackage{cleveref} %fixes an aweward bug... see https://tex.stackexchange.com/questions/538748/why-does-usepackagecleveref-fix-the-conflict-between-new-hyperref-amsthm
+\usepackage{subcaption}
+
+\usepackage{xr}
+\makeatletter
+\newcommand*{\addFileDependency}[1]{% argument=file name and extension
+  \typeout{(#1)}
+  \@addtofilelist{#1}
+  \IfFileExists{#1}{}{\typeout{No file #1.}}
+}
+\makeatother
+\addFileDependency{hult_502-supp.aux}
+\addFileDependency{hult_502-supp.tex}
+\externaldocument{hult_502-supp}
+
+%% Provided macros
+% \smaller: Because the class footnote size is essentially LaTeX's \small,
+%           redefining \footnotesize, we provide the original \footnotesize
+%           using this macro.
+%           (Use only sparingly, e.g., in drawings, as it is quite small.)
+
+%% Self-defined macros, symbols, theorem environments
+\input{sections/custom_commands.tex}
+
+% Theorem environments relating to amsthm
+\theoremstyle{plain}
+\newcounter{thm}
+\newtheorem{theorem}[thm]{Theorem}
+\newtheorem{lemma}[thm]{Lemma}
+\newtheorem{corollary}[thm]{Corollary}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+
+
+\title{Inference of Causal Effects when Control Variables are Unknown}
+
+% The standard author block has changed for UAI 2021 to provide
+% more space for long author lists and allow for complex affiliations
+%
+% All author information is authomatically removed by the class for the
+% anonymous submission version of your paper, so you can already add your
+% information below.
+%
+% Add authors in order of decreasing contribution
+\author[1]{\href{mailto:Ludvig~Hult<ludvig.hult@gmail.com>?Subject=Your UAI 2021 paper}{Ludvig~Hult}{}} % Lead author
+\author[1]{Dave~Zachariah}
+% Add affiliations after the authors
+\affil[1]{%
+    Systems and Control\\
+    Uppsala Universitet\\
+    Uppsala, Sweden
+}
+
+\begin{document}
+\maketitle
+
+
+\input{sections/abstract}
+\input{sections/introduction}
+\input{sections/problem_formulation}
+\input{sections/results}
+\input{sections/numerics}
+\input{sections/conclusion}
+
+
+\begin{contributions} % will be removed in pdf for initial submission,
+                      % so you can already fill it to test with the
+                      % ‘accepted’ class option
+Ludvig~Hult made the numerical simulations, the theoretical derivations and typeset the technical parts as well as produced all figueres and diagram.
+All code is due to Ludvig~Hult.
+
+Dave~Zachariah concieved the idea, guided the work and supported the article authoring.
+\end{contributions}
+
+\begin{acknowledgements} % will be removed in pdf for initial submission,
+                         % so you can already fill it to test with the
+                         % ‘accepted’ class option
+This work was partly supported by the Swedish Research Council under contract 2018-05040  and the \emph{Wallenberg AI, Autonomous Systems and Software Program (WASP)} funded by Knut and Alice Wallenberg Foundation.
+\end{acknowledgements}
+
+\bibliography{hult_502}
+
+\end{document}

@@ -1,0 +1,342 @@
+\section{Supplementary material}
+\subsection{Lemmas and proofs}
+
+\begin{lemma} \label{lemma:m1_is_kronecker}
+For the matrix $\semScaleMatrix = (\eye - \mutilatingMatrix \semCoeffMat^\T)^{-1}$, the element $\semScaleMatrix_{1i}$ is equal to the Kronecker delta $\kroneckerDelta_{1i}$, for $W\in \R^{\dNodes\times\dNodes}$ and $\mutilatingMatrix$ from equation \eqref{eq:def:mutilatingMatrix}.
+\end{lemma}
+\begin{proof}[Proof of Lemma \ref{lemma:m1_is_kronecker}]
+Using Cramers rule $\semScaleMatrix_{1i}=\frac{1}{\det(\eye-\mutilatingMatrix\semCoeffMat^\T)}\cofactorMatrix_{i1}$, where $\cofactorMatrix$ is the cofactor matrix of $(\eye-\mutilatingMatrix\semCoeffMat^\T)$.
+
+By definition of a cofactor as plus/minus a minor, and that the first row of $(\eye-\mutilatingMatrix\semCoeffMat^\T)$ is zero for all but the first element, $C_{i1}$ is zero for $i>1$, so $C_{i1} = \kroneckerDelta_{i1}\cofactorMatrix_{11}$
+
+By Laplace expansion of $\det(\eye-\mutilatingMatrix\semCoeffMat^\T)$ along the first row
+\[ \det(\eye-\mutilatingMatrix\semCoeffMat^\T) = \sum_{k=1}^d (\eye-\mutilatingMatrix\semCoeffMat^\T)_{1k} \cofactorMatrix_{1k} = \cofactorMatrix_{11} \]
+
+We conclude $\semScaleMatrix_{1i} = \frac{1}{\cofactorMatrix_{11}}\kroneckerDelta_{i1}\cofactorMatrix_{11} = \kroneckerDelta_{1i}$
+\end{proof}
+
+\begin{proof}[Proof of lemma \ref{lemma:averageCausalEffectInSem}]
+We need to show the result of equation \eqref{eq:def:averageCausalEffectInSem}.
+Introduce $\semScaleMatrix = (\eye-\mutilatingMatrix \semCoeffMat)^{-1}$.
+
+The proof follows by a direct computation, using Lemma \ref{lemma:m1_is_kronecker}. The noise covariance under the interventional distribution $\semInterventionNoiseCovariance$ is diagonal by assumption, which is also key.
+\begin{align}
+\averageCausalEffect(\semCoeffMat) 
+&= \frac{\covint_{\semCoeffMat}[\decisionVar,  \outcomeVar]}{\varint_{\semCoeffMat}[\decisionVar]} \\
+&= \frac{\covint_{\semCoeffMat}[\semVector,  \semVector]_{1,2}}{\covint_{\semCoeffMat}[\semVector,  \semVector]_{1,1}} \\
+&= \frac{\sum_{i,j=1}^\dNodes M_{1j}M_{2i}\semInterventionNoiseCovariance_{ij}} {\sum_{i,j=1}^\dNodes M_{1j}M_{1i}\semInterventionNoiseCovariance_{ij}} \\ 
+&= \frac{\sum_{i=1}^\dNodes M_{2i}\semInterventionNoiseCovariance_{i1}}{\semInterventionNoiseCovariance_{11}} \\ 
+&= \frac{M_{21}\semInterventionNoiseCovariance_{11}}{\semInterventionNoiseCovariance_{11}} \\ 
+&= M_{21}
+\end{align}
+This completes the proof.
+\end{proof}
+
+
+
+ We notice that there is nothing in the proofs of Lemma~\ref{lemma:m1_is_kronecker} and Lemma~\ref{lemma:averageCausalEffectInSem} specific about the first and second component - redefining the matrix $\mutilatingMatrix$ accordingly, it is straight forward to generalize the result if needed. 
+ To keep the notation simple, we do stay with the convention that the first component is the one we intervene on, and that the second is the outcome of interest.
+
+
+
+
+
+
+\begin{lemma}
+\label{lemma:nabla_h}
+	The function $h$ of \citet{zheng_dags_2018} has a closed form matrix gradient. It is ${\nabla h(W) = 2W \hadamard (\exp [ W\hadamard W ])^\T}$.
+\end{lemma}
+This formula is reported by \citet{zheng_dags_2018}, but without derivation. The result follows from liberal application of the chain rule.
+\begin{proof}[Proof of Lemma \ref{lemma:nabla_h}]
+$\frac{\partial}{\partial A_{i,j}} \tr A^k = k(A^{k-1})^\T_{i,j}$ by the product rule for derivation, and cyclicity of traces.
+
+By series expansion and using the equation above
+$\frac{\partial}{\partial A_{i,j}} \tr \exp [ A ] = (\exp[A])^\T_{i,j}$
+
+We have that  $\frac{\partial (W \hadamard W)_{k,l}}{\partial W_{i,j} } = 2W_{i,j} \delta_{i,k} \delta_{j,l}$ using the Kronecker delta symbol.
+
+The chain rule for differentiation now says
+$\frac{\partial}{\partial W_{i,j}} \tr \exp [ W \hadamard W] 
+= \sum_{k,l} \frac{\partial \tr \exp [ W \hadamard W]}{\partial (W\hadamard W)_{k,l}} \frac{\partial (W \hadamard W)_{k,l}}{\partial W_{i,j} }
+= 2W_{i,j}\frac{\partial \tr \exp [ W \hadamard W]}{\partial (W\hadamard W)_{i,j}} 
+= 2W_{i,j}(\exp[W \hadamard W])^\T_{i,j}$
+
+The rest is a matter of notation and diffrentiating a constant.
+\end{proof}
+
+
+
+
+\begin{lemma} \label{lemma:nonconvexWset}
+The set of all \DAG{}:s, $\semCoeffMatSet_0$ in \eqref{eq:def:semCoeffMatSet}, has the following properties
+\begin{enumerate}
+    \item  All points of $\semCoeffMatSet_0$ are boundary points (i.e., empty interior)
+    \item $\semCoeffMatSet_0$ is a direct sum of linear subspaces, so it is a unbounded set, and a cone
+    \item $\semCoeffMatSet_0$ is nonconvex. The convex hull of $\semCoeffMatSet_0$ is the set of all real $\dNodes\times\dNodes$-matrices.
+    \item $\hFun(\semCoeffMat)=0$ iff $\nabla h(W) =0$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}[Proof of Lemma \ref{lemma:nonconvexWset}]
+Only point four is a nontrivial result, as the others have a direct geometrical interpretation.
+
+The first point follows from the fact that for $q$ being any matrix with a nonzero on the diagonal, $\hFun(\semCoeffMat+\varepsilon q) > 0 \quad \forall \varepsilon>0$, even when $\semCoeffMat \in \semCoeffMatSet$
+
+The second point follows from the fact that $\hFun(\semCoeffMat)=0$ iff $\semCoeffMat$ is the weighted directed adjacency matrix of a DAG, and positive scaling that matrix will not affect the cyclicity structure.
+
+The third point: Consider the example $w=\begin{bmatrix} 0 &1 \\ 0 & 0 \end{bmatrix}$. Then, $w,w^\T \in \semCoeffMatSet$, but $(w+w^\T)/2 \not \in \semCoeffMatSet_0$, so $\semCoeffMatSet_0$ is nonconvex. Consider also an arbitrary matrix  $W=\sum_{ij=1}^d w_{ij}\unitBasisMatrix^{ij}$. It is a convex combination of the matrices $\unitBasisMatrix^{ij}$, which all belong to $\semCoeffMatSet_0$. Since $W$ was arbitrary, all matrices are in the convex hull of $\semCoeffMatSet_0$.
+
+The last point needs some more work, and is detailed below.
+
+We start with the forward implication. Since any DAG $W$ is permutation similar to a strictly upper triangular matrix, $(\exp [ W\hadamard W ])^\T$ is permutation similar to a strictly lower triangular matrix, with the same similarity transformation.
+$\nabla h(W)$ is therefore permutation similar to the elementwise product between a strictly upper and a strictly lower triangular matrix, which must be the zero matrix.
+
+For the the reverse implication, assume $W$ is not a DAG, so it has some cycle of length $K$, and $1\leq K \leq d$.
+Select $i$ and $j$ such that node $i$ and $j$ lies on that cycle. Now $W_{i,j} \neq 0$.
+One can go from node $i$ to node $j$ in $1$ step, so one must be able to go from node $j$ to node $i$ in $K-1$ steps.
+Therefore $ (W \hadamard W)^{K-1}_{j,i} \neq 0$. This makes sure that the exponential factor in $\nabla h(W)$ has a nonzero $i,j$-entry.
+
+\[ \left[ (\exp [ W\hadamard W ])^\T \right]_{i,j} = \sum_{k=0}^\infty \frac{[(W \hadamard W)^k]_{j,i}}{k!} \neq 0 \]
+
+\[\nabla h(W)_{i,j} = 2W_{i,j} \left[(\exp [ W\hadamard W ])^\T \right]_{i,j}\]
+
+Since this is a product of two positive real numbers, we can conclude that $\nabla h(W)  \neq 0$.
+\end{proof}
+
+This result supplements the discussion of \citet[p.7]{zheng_dags_2018}. Not only is the \DAG{}:s the global minima of $\hFun$, but they are also the zeroes of $\nabla \hFun$.
+
+The fourth point in Lemma~\ref{lemma:nonconvexWset} has during the time of writing this being reported in \citet[lemma 4]{wei_dags_2020}, but with a more different derivation technique valid for a slightly broader class of $h$-functions. It has also been reported in \citet[proposition 1]{ng_graph_2019}, with a proof technique very similar to ours.
+
+\begin{lemma}
+\label{lemma:lossAsQuadratic}
+The least-squares objective, and its derivatives are
+\begin{align}
+\mEstLoss_\mEstParameter(v) = \frac{1}{2} (\mEstParametrization\mEstParameter- \vecop(\eye))^\T \left[\semNoiseCovariance^{-1} \kronecker vv^\T\right] (\mEstParametrization\mEstParameter- \vecop(\eye))
+\end{align} 
+and its gradient and hessian is
+\begin{equation} \label{eq:mest:gradient} \nabla \mEstLoss_\mEstParameter(v) =  \mEstParametrization^\T \left[\semNoiseCovariance^{-1} \kronecker vv^\T\right] ( \mEstParametrization\mEstParameter- \vecop(\eye) ) \end{equation}
+\[ \nabla^2 \mEstLoss_\mEstParameter(v) =  \mEstParametrization^\T \left[\semNoiseCovariance^{-1} \kronecker vv^\T\right]  \mEstParametrization \]
+\end{lemma}
+The proof is direct computation, after using the formula $\tr(A^{\T} Y^{\T} BX) = (\vecop(Y))^{\T}[A\kronecker B] \vecop(B)$.
+\begin{proof}[Proof of Lemma \ref{lemma:lossAsQuadratic}]
+
+Use the vec-trick $\tr(A^{\T} Y^{\T} BX) = \vecop(Y)^{\T}[A\kronecker B] \vecop(B)$, and find the objective.
+\begin{align}
+    \mEstLoss_\mEstParameter(v) &= \frac{1}{2}  \norm{\semNoiseCovariance^{-1/2}\left(\eye-\matop(\mEstParametrization\mEstParameter)^\T\right)v}^2 \\
+    &= \frac{1}{2} \tr \left[ \semNoiseCovariance^{-1}\left(\matop(\mEstParametrization\mEstParameter)-\eye\right)^{\T}vv^\T \left(\matop(\mEstParametrization\mEstParameter)-\eye)\right) \right] \\
+    &= \frac{1}{2} (\mEstParametrization\mEstParameter- \vecop(\eye))^\T \left[\semNoiseCovariance^{-1} \kronecker vv^\T\right] (\mEstParametrization\mEstParameter- \vecop(\eye))
+\end{align} 
+
+The rest is differentiation of a quadratic.
+\end{proof}
+
+\begin{lemma}\label{lemma:mest:symbols}
+The quantities of Lemma~\ref{lemma:asymptotic_normal_mestparam} can be computed to be
+\[\Kn = \mEstParametrization^\T   \left[ \semNoiseCovariance^{-1} \kronecker \En \left[  \semVector \semVector^\T \right] \right]\mEstParametrization\]
+\[\PiN = \eye - (qq^\T)/(q^{\T}q)\] 
+\[q = \mEstParametrization^\T\vecop(2\semCoeffEstN \hadamard (\exp [ \semCoeffEstN\hadamard \semCoeffEstN ])^\T)\]
+\[\Jn = \mEstParametrization^\T \tilde \Jn \mEstParametrization \]
+\begin{multline}
+     (\tilde \Jn )_{d(j-1)+i,d(l-1)+k} =
+    \sum_{q,r,o,p=1}^{\dNodes} \Big\{
+    \big( \En\left[ \semVector_i \semVector_q \semVector_o \semVector_k \right]- \\
+    \En\left[ \semVector_i \semVector_q \right]\En\left[ \semVector_o \semVector_k \right]\big)
+    \semNoiseCovariance^{-1}_{j,r}
+    \semNoiseCovariance^{-1}_{p,l}
+    (\semCoeffMat-\eye)_{q,r}
+    (\semCoeffMat-\eye)_{o,p}
+    \Big\}
+\end{multline}
+\end{lemma}
+\begin{proof}[Proof of Lemma~\ref{lemma:mest:symbols}]
+
+The expression for $\Kn$ follows from Lemma~\ref{lemma:lossAsQuadratic}.
+\begin{multline}
+\Kn=
+\En[\nabla^2 \mEstLoss_\mEstParameter(v)] = \\
+\En \left[ \mEstParametrization^\T \left[\semNoiseCovariance^{-1} \kronecker vv^\T\right]  \mEstParametrization \right] 
+=  \mEstParametrization^\T \left[\semNoiseCovariance^{-1} \kronecker \En \left[ vv^\T\right] \right]  \mEstParametrization 
+\end{multline}
+
+$\PiN$  is a projection matrix with respect to the orthogonal complement of $q\coloneqq \nabla_{\mEstParameter} \hFun(\matop(L\mEstParameterEstN))$. Since $q$ is a vector, projection on the orthogonal complement is $\PiN = \eye - (qq^\T)/(q^{\T}q)$. The expression $q=\mEstParametrization^\T\vecop(2\semCoeffEstN \hadamard (\exp [ \semCoeffEstN\hadamard \semCoeffEstN ])^\T)$ follows from Lemma~\ref{lemma:nabla_h}, and $\semCoeffEstN = \vecop{\mEstParametrization\mEstParameterEstN}$.
+
+The derivation of $\Jn$ is an mostly tracking indices. Start with $\Jn = \En[\nabla \mEstLoss_{\mEstParameterEstN}(v)\nabla \mEstLoss_{\mEstParameterEstN}(v)^\T]
+ -\En[\nabla \mEstLoss_{\mEstParameterEstN}(v)]\En[\nabla \mEstLoss_{\mEstParameterEstN}(v)]^\T$ and apply to  Lemma~\ref{lemma:lossAsQuadratic}. First factor out the $\mEstParametrization$ matrix of \eqref{eq:mest:gradient}, and then covert the rest into indices. Apply the index conversion for vectorizations $\vecop{A}_{d(j-1)+i}=A_{i,j}$ and for kronecker products $[A\kronecker{}B]_{d(i-1)+j,d(k-1)+l}=A_{i,k}B_{j,l}$ when $A$ and $B$ are $\dNodes\times\dNodes$ sized.
+\end{proof}
+
+
+The next lemma collects the assumption verification for applying Corollary~\ref{cor:constrained_m_est} in proof of Lemma~\ref{lemma:asymptotic_normal_mestparam}. Herein we use the redundant norm-constraint, that is in some parts skipped.
+\begin{lemma}
+\label{lemma:mest:technicalities}
+Using the loss function \eqref{eq:def:mest:loss}, and the parameter set $\mEstParameterSet:=\{\mEstParameter \mid| \hFun\left(\matop(\mEstParametrization\mEstParameter\right)-\dagTolerance = 0 \land \norm{\theta}\leq B \}$, we see that
+\begin{enumerate}
+    \item The techincal conditions for M-estimation \citep[Theorem 12.2]{wooldridge_econometric_2010} holds.
+    \item The loss function $\mEstLoss_\mEstParameter(\semVector)$ is two times continously diffrentiable in $\semVector$.
+    \item $\mEstParameterSet \coloneqq \{ \mEstParameter \in \mathbb R^p \mid \mEstConstrint(\mEstParameter)=0\}$ for some vector-valued constraint function $\mEstConstrint$ such that $\mEstParameterSet $ is bounded.
+    \item The Jacobian matrix $\nabla \mEstConstrint( \mEstParameterEstN)$ has full rank for all $n$.
+    %\item $\nabla \En \mEstLoss_\mEstParameter (\semVector) =  \En \nabla \mEstLoss_\mEstParameter(\semVector)$, so that the expectation and gradient commutes.
+    \item $\En \left[ \nabla^2 \mEstLoss_{\mEstParameter}(v)\right]$ is invertible for all $\mEstParameter$.
+    \item $\mEstParameterTrue$ is the unique minimizer of $ \E[\mEstLoss_\mEstParameter(\semVector)]$
+    %\item $\mEstLoss_\mEstParameter(v)$ is borel measurable over $x$ for each $\mEstParameter \in \mEstParameterSet $
+    %\item For each $x$, $\mEstLoss_\mEstParameter(x)$ is continous in $\mEstParameterSet$.
+    %\item There is a function $b$ such that $b(x) \geq |\mEstLoss_\mEstParameter(x)| \forall \mEstParameter$ and $ \E[b(\semVector)] < \infty$.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+First notice that \eqref{eq:def:mest:loss} is quadratic in $\mEstParameter$, but also in $\semVector$, which is more clearly seen in \eqref{eq:def:Wn}.
+\begin{enumerate}
+    \item The technical conditions are (a) that $\mEstParameterSet$ is compact, which follows from closed and boundedness (b) that $\mEstLoss_\mEstParameter(\semVector)$ is borel measurable in $\semVector$ for each $\mEstParameter$, which follow from being quadratic, (c) that $\mEstLoss_\mEstParameter(\semVector)$ is continuous in $\mEstParameter$ for each $\semVector$, which follows from being a quadratic and (d) that there is a dominating function $d(\semVector)\geq |\mEstLoss_\mEstParameter(\semVector)|$ for all $\mEstParameter$ so that $\E[d(\semVector)] < \infty$, which needs a few steps to prove. Observe
+    \begin{align}
+    |\mEstLoss_\mEstParameter(\semVector)|&=\frac{1}{2}\norm{\semNoiseCovariance^{-1/2}(\eye-\matop(L\theta))\semVector}_2^2\\
+    &\leq\frac{1}{2}\sigma_1(\semNoiseCovariance^{-1/2})^2\sigma_1(\eye-\matop(L\theta))^2\norm{v}^2\\
+    & \leq C\norm{v}^2\eqqcolon d(v),\end{align}
+    where $\sigma_1$ denotes the largest singular value and \[C:=\frac{1}{2}\sigma_1(\semNoiseCovariance^{-1/2})^2\max_{\mEstParameter \in \mEstParameterSet} \sigma_1(\eye-\matop(L\theta))^2 ,\]
+    utilizing compactness of $\mEstParameterSet$. Finally $\E[d(v)] = C\E[\norm{v}^2] = C\tr{}[(\eye-W^{\T})^{-1}\semNoiseCovariance(\eye-W)^{-1}] \leq \infty$, using the assumed data generating process \eqref{eq:sem:linear_sem}.
+    \item $\mEstLoss_\mEstParameter(\semVector)$ is two times continously diffrentiable in $\semVector$, since it is a quadratic in $\semVector$
+    \item The form of $\mEstParameterSet:=\{\mEstParameter \mid| \hFun\left(\matop(\mEstParametrization\mEstParameter\right)-\dagTolerance = 0 \land \norm{\theta}\leq B \}$ can be transformed into equality form by introduction of a slack variable $s$, so that $\mEstParameterSet:=\{\mEstParameter,s \mid| \hFun\left(\matop(\mEstParametrization\mEstParameter\right)-\dagTolerance = 0 \land \norm{\theta}+s^2-B=0 \}$, so $g(s,\mEstParameter)=\begin{bmatrix}\hFun\left(\matop(\mEstParametrization\mEstParameter\right)-\dagTolerance \\ \norm{\theta}+s^2-B\end{bmatrix}$.
+    \item By lemma~\ref{lemma:nonconvexWset}, $\nabla \mEstConstrint( \mEstParameterEstN)$ is nonzero over $\mEstParameterSet$, but the gradient with respect to the slack is zero. Furthermore $\nabla_s[\norm{\theta}+s^2-B]=2s$, which is zero only for $s=0$, but we know from \ref{lemma:unconstrained_minimization} that $s\neq 0$. So the two components of $g$ must have linerarly independent gradients, and the jacobian has full rank. Do note that the slack-formulation used here is supressed from the formalism in the rest of the article, since it is an inactive constraint, making the proofs and text less clear with no gain.
+    \item  $\En \left[ \nabla^2 \mEstLoss_{\mEstParameter}(v)\right] = \mEstParametrization^\T \left[\semNoiseCovariance^{-1} \kronecker \En[vv^\T]\right]  \mEstParametrization $, which almost surely has full rank. We ignore the measure zero case.
+    \item The unicity of $\mEstParameterTrue$ we have to take by assumption, as discussed elsewhere in this article.
+\end{enumerate}
+\end{proof}
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{lemma}
+\label{lemma:gradient_of_ace}
+The gradient of the causal effect $\averageCausalEffect$ with respect to the parameter $\mEstParameter$ is 
+\begin{align}
+\left[ \nabla _\mEstParameter \averageCausalEffect(\mEstParameter) \right]_k = -\left( \left[\semScaleMatrix \mutilatingMatrix \kronecker \eye \right] \mEstParametrization \right)_{d+1,k} 
+\end{align}
+\end{lemma}
+\begin{proof}[Proof of Lemma \ref{lemma:gradient_of_ace}]
+Start from Lemma~\ref{lemma:averageCausalEffectInSem}. Apply derivation rules for matrix inverses, and utilize the unit basis matrices $\unitBasisMatrix^{i,j}$ which zero in every entry, except the $i,j$-entry.
+\begin{align}
+    \frac{\partial(\averageCausalEffect(W))}{\partial \semCoeffMat_{i,j}} &= \frac{\partial(\semScaleMatrix_{21})}{\partial \semCoeffMat_{i,j}}  \\ &=\sum_{k,l=1}^\dNodes \semScaleMatrix_{2k} \frac{\partial( \eye - \mutilatingMatrix\semCoeffMat^\T))_{kl}}{\partial \semCoeffMat_{i,j}} \semScaleMatrix_{l1} \\
+    &=-\sum_{k,l=1}^\dNodes \semScaleMatrix_{2k} \mutilatingMatrix_{km} \unitBasisMatrix^{ij}_{lm} \semScaleMatrix_{l1}  \\
+    &= -(\semScaleMatrix \mutilatingMatrix)_{2j}\semScaleMatrix_{i1} \\
+    &= -\left[ \semScaleMatrix \mutilatingMatrix \kronecker \semScaleMatrix^\T  \right]_{d+1,\dNodes(j-1)+i} \\
+\end{align}
+
+As an aside, we can note that the matrix with these entries has a compact definition, $-(\left[ \semScaleMatrix \mutilatingMatrix \kronecker \semScaleMatrix^\T  \right]) = \frac{\partial \vecop(M^{T})}{\partial \vecop W}$. Armed with this expression and 
+\begin{align}
+    \frac{\partial \semCoeffMat_{i,j}}{\partial \mEstParameter_k} = \mEstParametrization_{\dNodes(j-1)+i,k}
+\end{align}
+we can compute 
+\begin{align}
+\left[ \nabla _\mEstParameter \averageCausalEffect(\mEstParameter) \right]_k 
+%&= \frac{  \averageCausalEffect(\mEstParameter)} { \partial \mEstParameter_k} \\ 
+&= \sum_{i,j=1}^\dNodes \frac{\partial(\averageCausalEffect(W))}{\partial \semCoeffMat_{i,j}}\frac{\partial \semCoeffMat_{i,j}}{\partial \mEstParameter_k} \\ 
+=&-\left( \left[\semScaleMatrix \mutilatingMatrix \kronecker \eye \right]  \mEstParametrization \right)_{d+1,k}
+\end{align}
+\end{proof}
+
+\subsection{Numerical Experiments}
+\subsubsection{Detailed sensitivity study}\label{subsection:extra_sensitivity}
+In section~\ref{subsection:numerics:sensitivity} we studied the impact of $\dagTolerance$ in relation to our causal effect measure $\averageCausalEffectTarget$. In this section, we provide additional results (in Figure~\ref{fig:sensitivity_details}) that shed more light on the behavior of the solution. 
+
+The computations are performed as in in section~\ref{subsection:numerics:sensitivity}, but with 20 random graphs instead of 10, and a wider range of $\dagTolerance$
+
+Comparing Figures \ref{fig:sensitivity_details}d and \ref{fig:sensitivity_details}b, we note that while setting $\dagTolerance > \dagToleranceMax$ yields an inaccurate non-\DAG{} matrix $\semCoeffOpt(\dagTolerance)$, it may occasionally produce accurate $\averageCausalEffectNumeric(\dagTolerance)$ depending on the unknown data-generating process and the nonlinear mapping in \eqref{eq:def:averageCausalEffectInSem}.
+
+\begin{figure*}[ht!]
+    \centering
+    \input{tikz/dagtol_details.tex}
+    \caption{Detailed graphs for the extended sensitivity analysis. We conclude that $\dagTolerance \rightarrow 0$ is a strong indication that $\semCoeffOpt(\dagTolerance) \rightarrow \semCoeffOpt(0)$..}\label{fig:sensitivity_details}
+\end{figure*}
+
+In Figure~\ref{fig:sensitivity_details:hfun} we see that to improve the \DAG{}-fidelity (quantified by $\hFun(\semCoeffMat)$), we need to reduce $\augLagConstraintTol$. However, in the numerical runs, we could see that required raising $\augLagPenMax$ further, which may lead to numerical inaccuracies.
+
+
+
+\subsubsection{Linearity assumptions violations}
+\label{subsection:linearity_assumption_violation}
+
+All numerical experiments above been performed using data drawn from \emph{linear} \scm{}s. We now consider the behavior of the method when the data-generating process is non-linear and study the coverage of the target quantity $\averageCausalEffectTarget$. It is still defined in \eqref{eq:def:averageCausalEffectTarget} as the average causal effect of the optimal linear \scm{} (although it will diverge from the unknown distribution parameter $\averageCausalEffect$ depending on the type of nonlinearity). 
+
+We use the same models as \citet{yu_daggnn_2019}:
+\begin{enumerate}
+    \item Linear: $\semVector=\semCoeffMat^\T\semVector+\semNoise$ where 
+    \item Nonlinear 1: $\semVector=\semCoeffMat^\T \cos(\semVector+\vecOne) +\semNoise$,
+    \item Nonlinear 2: $\semVector=2\sin (\semCoeffMat^\T(\semVector+0.5\cdot \vecOne)) + \semCoeffMat^\T(\semVector+0.5\cdot \vecOne) +\semNoise$
+\end{enumerate}
+The coefficient matrix $\semCoeffMat$ is generated as in section \ref{sec:numerics} and the random elements of $\semNoise$ are drawn independently as $\normal (0,1)$. Let $\vecOne$ denote a vector of ones, and $\cos(\cdot)$ and $\sin(\cdot)$ on vectors be defined entry-wise.
+For each of these models $\nData=10^{3}$ data points are generated. %$\averageCausalEffectTarget$ is approximated using $n' =  10^6$.
+
+We performed $200$ Monte Carlo runs and report the empirical coverage rate $CR$  of $\averageCausalEffectSet_{\alpha, \nData}$ in Table \ref{tab:nonlinear_results}, $\dNodes$ is the number of nodes in the \scm{} and $k$ denotes the number of number of expected edges per node. We find that in all cases the empirical coverage rate exceeds the target $1-\alpha = 95\%$, in accordance with the theory, but the confidence interval is more conservative in the nonlinear cases than the linear case. 
+
+\begin{table}
+    \centering
+    \caption{Empirical coverage rates of $\averageCausalEffectSet_{\nData,\confidenceLevel\%}$ from numerical experiment on linear assumption violation. Nominal coverage set to $1-\confidenceLevel=95\%$.}\label{tab:nonlinear_results}
+    \begin{tabular}{ccccc}
+      \toprule
+      $\dNodes$ & $k$ & linear&nonlinear1&nonlinear2\\
+      \midrule
+      5 & 1 & 98.0\% & 97.0\%& 99.5\% \\
+      5 & 2 & 97.5\% & 96.5\%& 100.0\% \\
+      10 & 1 & 96.0\% & 98.5\%& 99.5\% \\
+      10 & 2 & 95.5\% & 96.5\%& 100.0\% \\
+      \bottomrule
+    \end{tabular}
+\end{table}
+
+
+\subsubsection{Misspecified latent covariance structure}
+One of the major challenges of the method is the assumption of an approximately known latent covariance $\semNoiseCovariance$. This section explores the sensitivity to misspecification in this parameter.
+
+First, we restate \citet[Theorem 9]{loh_high-dimensional_2014}. 
+Let $W_1 \gg W_0$ if the directed graph encoded by $W_1$ is a supergraph of $W_0$. \emph{I.e.} for all indices $i,j$, $[W_0]_{i,j} \neq 0$ implies $[W_1]_{i,j} \neq 0$. The converse, $W_1 \not\gg W_0$ means that there is some component of $W_1$ that is zero, even though the corresponding  component of $W_0$ is not. 
+Define the \emph{additive gap} $\xi $ to be the difference in expected squared loss between the optimal DAG adjacency matrix and the second best one among the non-supergraph-models. Compare the following with \eqref{eq:def:semcoefftrue}. Define
+\begin{align}
+\mathtt{score}(W)\coloneqq& \E\Big[ \norm{\semNoiseCovariance^{-1/2}  \left(\eye - \semCoeffMat^\T\right)\semVector }^2 \Big] \\
+W_{0} \coloneqq& \argmin_{\semCoeffMat \in \semCoeffMatSet_0} \mathtt{score}(W) \\
+\xi \coloneqq& \min_{\substack{\semCoeffMat \in \semCoeffMatSet_0\\ \semCoeffMat\not\gg \semCoeffMat_0 }} \left\{ \mathtt{score}(W)\right\} - \mathtt{score}(W_0) 
+\end{align}
+This gap is defined from the data generating process uniquely, and can only be computed if the the data generating latent covariance $ \semNoiseCovariance$ is known - at least up to a scale factor. 
+When this is not known, we assume some latent variance structure $\widehat \semNoiseCovariance$, and quantify our misspecification by the condition number $\misspecCond$.
+
+\begin{lemma}[Loh Bühlmann, Lemma 9]
+If
+\[\misspecCond \leq 1+\frac{\xi}{\dNodes} \label{eq:good noise covariance}\]
+then $W_0 \in\argmin_{\semCoeffMat \in \semCoeffMatSet_0} \E\Big[ \norm{\assStruct^{-1/2}  \left(\eye - \semCoeffMat^\T\right)\semVector }^2 \Big]$. If the inqeuality is strict, then $W_0$ is the unique minimizer.
+\end{lemma}
+
+If the structure is correctly assumed, \emph{i.e.} $\semNoiseCovariance = \semNoiseScale \assStruct$ for some scaling factor $\semNoiseScale$, then 
+\[ \min_{\semCoeffMat \in \semCoeffMatSet_0} \E\Big[ \norm{\assStruct^{-1/2}  \left(\eye - \semCoeffMat^\T\right)\semVector }^2 \Big] = s\dNodes\]
+so we can estimate the scale factor $s$ from data, assuming that we have the correct latent covariance structure $\widehat \semNoiseCovariance$.\citep[Corollary 8]{loh_high-dimensional_2014} Denote this empirical estimate $\hat s$.
+
+How does these results affect the confidence interval of Theorem~\ref{thm:cofidence_interval_for_ace}? We replace $\semNoiseCovariance $ in \eqref{eq:mest:score_variance} with $\hat \semNoiseScale \assStruct$ using the biased estimate of the scale $\semNoiseScale$.
+\footnote{The estimate is most likely biased since most likely $\assStruct$ is not proportional to the true data generating $\semNoiseCovariance$.}
+We conducted numerical studies aiming to illustrate that the confidence interval is good when $\misspecCond$ is small enough. 
+
+We generate data as in \ref{subsection:calibration}, but with a random latent noise matrix $\semNoiseCovariance$. The matrix is diagonal, with entries drawn uniformly iid from from the interval $[1-\Delta,1+\Delta]$, and $\Delta=\frac{1-\kappa_{max}}{1+\kappa_{max}}$. We use $\widehat\semNoiseCovariance=\eye$ as before. This guarantees that $\misspecCond \leq \kappa_{max}$.
+
+For each draw of $\nData$ data points, compute $\misspecCond$, as well as $\averageCausalEffectTarget$ and $\averageCausalEffectSet$ as described in section \ref{sec:numerics}.
+
+\begin{figure}
+    \centering
+    \input{tikz/misspec_scatter.tikz}
+    \caption{The average causal effect $\averageCausalEffectTarget$ is in general close to the true value, except when the condition number $\misspecCond$ becomes larger than some threshold value. This computation is not dependant on the number of data points drawn. Every run is marked with an $x$, and the true average causal effect is denoted with a dashed hosrizontal line, mostly occluded by the $x$-marks.}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \input{tikz/misspec_coverage_100.tikz}
+    \caption{For $\nData=100$. Empirical coverage, as the misspecification is increased. 1000 runs with random noise matrices $\semNoiseCovariance$ run. For each run, we have computed if $\averageCausalEffectTarget \in \averageCausalEffectSet$ or not. The runs have been binned in groups of $n_b=100$, and each bin $b$ has an empirical coverage rate $\hat p_b$ computed. The shaded area represent $\hat p \pm 2\sqrt{\frac{\hat p(1-\hat p)}{n_b}}$. In general, the misspecification voids the guarantee for the coverage rate, but as long as the misspecification is small, the coverage rate is close to the promised one. } \label{fig:misspec coverage 100}.
+\end{figure}
+
+
+\begin{figure}
+    \centering
+    \input{tikz/misspec_coverage_10000.tikz}
+    \caption{Setup as in Figure~\ref{fig:misspec coverage 100}, but $\nData=10000$.}
+\end{figure}

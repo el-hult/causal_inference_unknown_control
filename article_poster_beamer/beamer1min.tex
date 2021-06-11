@@ -1,0 +1,107 @@
+\documentclass[aspectratio=1610,10pt]{beamer}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Theming
+\usetheme[progressbar=frametitle,numbering=fraction]{metropolis}
+\addtobeamertemplate{frametitle}{}{%
+\begin{textblock*}{100mm}(.85\textwidth,-1cm)
+\includegraphics[width=.65cm,trim={0 1.5cm 1.5cm 0}]{figures/UU_logo_vit.pdf}
+\end{textblock*}}
+
+\definecolor{black_}{RGB}{25, 25, 25}
+\definecolor{blue_}{RGB}{46,131,191}
+\definecolor{green_}{RGB}{46,191,106}
+\definecolor{uured}{RGB}{191,45,56}
+\definecolor{uudarkgrey}{RGB}{130,130,130}
+\definecolor{uumidgrey}{RGB}{190,190,190}
+\definecolor{uulightgrey}{RGB}{230,230,230}
+\setbeamercolor{alerted text}{fg=uured}
+\setbeamercolor{example text}{fg=green_}
+%\metroset{block=fill}
+\usepackage{pgfplots}
+\pgfplotscreateplotcyclelist{myColorList}{%
+        color=blue_,every mark/.append style={fill=blue_},mark=*\\%
+        color=uured,every mark/.append style={fill=uured},mark=square*\\%
+        color=green_,every mark/.append style={fill=green_},mark=otimes*\\%
+        color=black_,every mark/.append style={fill=black_},mark=diamond*\\%
+    }
+\pgfplotsset{every axis/.append style={cycle list name=myColorList}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\usepackage{subcaption}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{calc}
+\usepackage{pgfplots}	
+\pgfplotsset{compat=1.17}
+\usepackage{textpos}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{booktabs}
+
+
+\let\definition\relax
+\input{sections/custom_commands.tex}
+
+\begin{document}
+
+
+\begin{frame}{Inference of Causal Effect when Control Variables are Unknown\footnote{Work by Ludvig Hult and Dave Zachariah, Uppsala University, Contact: \texttt{ludvig.hult@it.uu.se}}}
+
+  \centering
+    \input{tikz/covid_dag.tikz}  \\
+    Example: \textbf{Causal effect estimation} in observational database, with \textbf{unknown causal graph}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Methods and results}
+\begin{columns}
+\begin{column}{0.4\textwidth}
+  \textbf{\small Model}
+  \begin{align*}
+    \semVector^{\T} &= (\decisionVar,\outcomeVar,\adjustmentVar_1,...,\adjustmentVar_{d-2})\\
+    \semVector &= \semCoeffMat^\T\semVector + \semNoise \\
+    \E[\semNoise]&=0 \; \var[\semNoise]=\semNoiseCovariance
+  \end{align*}
+  \textbf{\small Causal Effect Parameter}
+  \begin{align*}
+    \averageCausalEffect =   \argmin_{\bar{\averageCausalEffect}} \; \Eint\left[ \big( \Eint[\outcomeVar|\decisionVar]  - \bar{\averageCausalEffect}\decisionVar \big)^2 \right]
+  \end{align*}
+  \textbf{\small Confidence Interval}
+    \begin{tikzpicture}[baseline]
+      \pgfplotstableread[col sep=comma]{./data/4node_collider_summary.csv}{\datatable};
+      \begin{semilogxaxis}[
+        width=\columnwidth,
+        height=\columnwidth/2,
+        xmin=90,
+        xmax=11000,
+        legend style={font=\scriptsize, at={(0.5,1.10)},
+        anchor=south,legend columns=-1},
+        tick label style={font=\tiny}
+      ]
+        \addplot+ [ only marks, mark=*, mark size=1pt,
+            error bars/.cd,
+            y dir=both,
+            y explicit] table [x=m_obs, y=ace_value, y error=q_ace_standard_error] {\datatable};
+        \addplot+ [only marks, mark=*, mark size= 1 pt,
+            error bars/.cd,
+            y dir=both,
+            y explicit] table [x=m_obs, y=ols_value, y error=q_ols_standard_error] {\datatable};
+        \addplot [no markers] table [x=m_obs, y=ace_circ] {\datatable};
+        \legend{{$\averageCausalEffectSet_{\confidenceLevel,\nData}$},{$\regCoefficientSet_{\confidenceLevel,\nData}$},{$\averageCausalEffectTarget$}}
+      \end{semilogxaxis}
+    \end{tikzpicture}
+  \end{column}
+\begin{column}{0.6\textwidth}
+  \textbf{Our Contribution}
+  \begin{itemize}
+    \item Estimating \textcolor{green_}{causal effect parameter} when \textcolor{green_}{unknown control variables}
+    \item \textcolor{green_}{Valid confidence interval} for causal effect in linear additive causal model
+    \item \textcolor{green_}{Numerical studies} comparing with naive method, and \textcolor{green_}{bootstrap} alternative
+  \end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+\end{document}

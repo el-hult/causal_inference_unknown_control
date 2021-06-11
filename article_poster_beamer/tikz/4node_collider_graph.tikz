@@ -1,0 +1,13 @@
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,semithick]
+  %\tikzstyle{every node}=[fill=none,draw=none]
+ % https://tex.stackexchange.com/questions/445946/how-set-tikz-circle-radius-in-nodecircle
+  \node[circle,draw, minimum size=20pt] (Z2) {$\adjustmentVar_1$};
+  \node[circle,draw, minimum size=20pt] (X) [above right of=Z2] {$\decisionVar$};
+  \node[circle,draw, minimum size=20pt] (Y) [below right of=Z2] {$\outcomeVar$};
+  \node[circle,draw, minimum size=20pt] (Z1) [below right of=X] {$\adjustmentVar_2$};
+
+  \path (Z1) edge  (X)
+  (Z1) edge   (Y)
+  (X) edge   (Z2)
+  (Y) edge   (Z2);
+\end{tikzpicture}

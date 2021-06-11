@@ -1,0 +1,16 @@
+\begin{tikzpicture}[baseline]
+    \pgfplotstableread[col sep=comma]{./data/calibration_qq.csv}{\datatable};
+    \begin{axis}[
+        width=\columnwidth,
+        height=.6\columnwidth,
+        xlabel={Theoretical Quantile},
+        ylabel={Data Quantile},
+        legend pos=south east,
+        legend style={font=\scriptsize},
+    ]
+        \addplot [no marks, domain=-4:4] {x};
+        \addplot+ [only marks] table [x=ace_n_theoretical_z, y=0] {\datatable};
+        \addplot+ [only marks] table [x=ace_n_theoretical_z, y=1] {\datatable};
+        \legend{,{$\nData=10^2$},{$\nData=10^4$}}
+    \end{axis}
+\end{tikzpicture}

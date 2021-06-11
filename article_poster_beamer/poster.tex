@@ -1,0 +1,275 @@
+\documentclass[landscape,a0paper,25pt,margin=0mm]{tikzposter}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%    UU STYLING
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tikzposterlatexaffectionproofoff
+
+% UU wants arial font. Helvetica is close enough
+\usepackage{helvet} 
+\renewcommand{\familydefault}{\sfdefault}
+
+% https://tex.stackexchange.com/questions/180234/how-can-i-make-my-title-wrap-in-a-tikzposter
+% \makeatletter
+% \def\title#1{\gdef\@title{\scalebox{\TP@titletextscale}{%
+% \begin{minipage}[t]{\linewidth}
+% \centering
+% #1
+% \par
+% \vspace{0.5em}
+% \end{minipage}%
+% }}}
+% \makeatother
+
+
+% Profile colors according to 
+% https://mp.uu.se/en/web/info/stod/kommunikation-riktlinjer/grafiskariktl/profilfarger
+\definecolor{uured}{RGB}{153,0,0}
+\definecolor{uudarkgrey}{RGB}{130,130,130}
+\definecolor{uumidgrey}{RGB}{190,190,190}
+\definecolor{uulightgrey}{RGB}{230,230,230}
+\definecolor{uuPosterBorder}{RGB}{217,217,217}
+
+
+\definecolorstyle{UUColorStyle}{
+    \definecolor{colorOne}{named}{uured}
+    \definecolor{colorTwo}{named}{uumidgrey}
+    \definecolor{colorThree}{named}{uudarkgrey}
+}{
+    % Background Colors
+    \colorlet{backgroundcolor}{white}
+    \colorlet{framecolor}{uulightgrey}
+    % Title Colors
+    \colorlet{titlefgcolor}{black}
+    \colorlet{titlebgcolor}{white}
+    % Block Colors
+    \colorlet{blocktitlebgcolor}{uulightgrey}
+    \colorlet{blocktitlefgcolor}{colorOne}
+    \colorlet{blockbodybgcolor}{white}
+    \colorlet{blockbodyfgcolor}{black}
+    % Innerblock Colors
+    \colorlet{innerblocktitlebgcolor}{white}
+    \colorlet{innerblocktitlefgcolor}{black}
+    \colorlet{innerblockbodybgcolor}{white}
+    \colorlet{innerblockbodyfgcolor}{black}
+    % Note colors
+    \colorlet{notefgcolor}{white}
+    \colorlet{notebgcolor}{colorOne}
+    \colorlet{noteframecolor}{colorTwo}
+}
+\definebackgroundstyle{uuPosterBorder}{
+    \draw[local bounding box=rect, inner sep=0pt, line width=0pt, color=uuPosterBorder,fill=uuPosterBorder](bottomleft) rectangle ++(0.1*\paperwidth,\paperheight);
+    \node  at (-53,+35) {
+        \includegraphics[width=7cm]{figures/UU_logo.pdf}
+        };
+    \node[text width=10cm,line width=0pt] at (-53,-35) {\color{white}\footnotesize
+        \textbf{UAI 2021 contribution}\\
+        Ludvig Hult\\
+        \texttt{ludvig.hult@it.uu.se}\\
+        Dave Zachariah\\
+        \texttt{dave.zachariah@it.uu.se}
+        };
+}
+\definelayouttheme{UUTheme}{
+    \usecolorstyle{UUColorStyle}
+    \usebackgroundstyle{uuPosterBorder}
+    \usetitlestyle{Empty}
+}
+
+\usetheme{UUTheme}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%    STYLING END
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{doi}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{mathtools,amssymb,amsmath}
+\usepackage{subcaption}
+\usepackage{tikz} \usetikzlibrary{arrows, intersections, positioning}
+\usepackage{pgfplots} \pgfplotsset{compat=1.17}
+\input{sections/custom_commands.tex}
+
+\definecolor{black_}{RGB}{25, 25, 25}
+\definecolor{blue_}{RGB}{46,131,191}
+\definecolor{green_}{RGB}{46,191,106}
+\usepackage{pgfplots}
+\pgfplotscreateplotcyclelist{myColorList}{%
+        color=blue_,every mark/.append style={fill=blue_},mark=*\\%
+        color=uured,every mark/.append style={fill=uured},mark=square*\\%
+        color=green_,every mark/.append style={fill=green_},mark=otimes*\\%
+        color=black_,every mark/.append style={fill=black_},mark=diamond*\\%
+    }
+\pgfplotsset{every axis/.append style={cycle list name=myColorList}}
+\tikzset{visible on/.style={}}% dummy style to prevent animations
+\newcommand{\blueGamma}{\textcolor{blue_}{\averageCausalEffectSet_{\confidenceLevel, \nData}}}
+
+
+
+\title{Inference of Causal Effects when Control Variables are Unknown}
+\author{Ludvig Hult, Dave Zachariah}
+\institute{Department of Information Technology, Uppsala University, Sweden}
+
+%https://tex.stackexchange.com/questions/254257/tikzposter-and-doi-package-conflict
+\def\HyperFirstAtBeginDocument#1{#1}
+\begin{document}
+
+\maketitle[width=0.6\textwidth]
+
+
+
+\begin{columns}
+
+% EMPTY column to make sure the bakground border looks nice
+\column{0.10}
+
+
+% FIRST column -- Background
+\column{0.3}
+
+\colorlet{tmp}{blockbodybgcolor}
+\colorlet{blockbodybgcolor}{uulightgrey}
+\block[roundedcorners=0,linewidth=1mm]{}{
+    \coloredbox[roundedcorners=0,framecolor=uured]{\LARGE Main takeaway of this paper}{
+        \large
+        \begin{itemize}[itemsep=0.7ex]
+            \item \textbf{Smooth optimization} enables \textbf{confidence intervals} in causal discovery
+            \item We have obtained \textbf{confidence intervals for a Causal Effect Parameter} from observational data, even when the \textbf{control variabels are unknown}
+            \item The method relies on \textbf{linear additive structural causal model} with \textbf{known latent covariance}
+            \item We have \textbf{numerically verified} the method, and alternative methods are shown to not be valid
+        \end{itemize}
+    }
+}
+\colorlet{blockbodybgcolor}{tmp}
+
+\block[roundedcorners=0, linewidth=1mm, titleleft]{Context}{
+    \innerblock{}{
+        In observational data analysis
+        the basis for any \textbf{conclusions about causal effects} (e.g. the effect of taking supplements on the risk of getting covid)
+        relies on knowing a \textbf{valid set of control variables}.
+    }
+    \innerblock{}{
+        By knowing the system \textbf{causal graph}, we can read off the control variables. It is often not known.
+        }
+    \innerblock{}{
+    \begin{itemize}
+        \item Expert groups can \textbf{propose a graph, but only if there is previous litterature} in th field
+        \item By \textbf{causal discovery}, we can infer a graph from data. Difficult to assess uncertainty quantifications, due to discrete optimization
+    \end{itemize}
+    }
+}
+\block[roundedcorners=0, linewidth=1mm, titleleft]{Linear additive causal models}{
+    \innerblock{}{
+        We use data generating process
+        \[\semVector^\T{} = (\decisionVar,\outcomeVar,\adjustmentVar_1,...\adjustmentVar_{d-2})^\T{}\] 
+        \[ \semVector = \semCoeffMat^\T{}\semVector+\semNoise\]
+        where $\semCoeffMat$ is a unknown \DAG{}, and $\semNoise$ is random, with mean 0 and known diagonal covariance $\semNoiseCovariance$.
+    }
+    \innerblock{}{
+        The data generating process $\observationalDistribution(\semVector)$ has an accompynig \textbf{interventional distribution} $\interventionalDistribution(\semVector)$ arising from performing interventions on $\decisionVar$.
+        We want to infer the \textbf{causal effect parameter}
+        \begin{align*}
+            \averageCausalEffect =   \argmin_{\bar{\averageCausalEffect}} \; \Eint\left[ \big( \Eint[\outcomeVar|\decisionVar]  - \bar{\averageCausalEffect}\decisionVar \big)^2 \right]
+        \end{align*}
+        from observational data, assuming $\Eint[x]=\Eint[y]=0$.
+    }
+}
+
+
+
+% SECOND column -- theory
+\column{0.3}
+
+\block[roundedcorners=0, linewidth=1mm, titleleft]{Target quantity}{
+    \innerblock{}{
+        When $\semCoeffMatSet_\dagTolerance$ set of almost-\DAG{}s, $\semCoeffOpt$ is optimal for the data, and 
+        $\averageCausalEffectTarget$ its \textbf{causal effect parameter}.
+    }
+    \innerblock{}{
+        \begin{equation*}
+            \averageCausalEffectTarget = \averageCausalEffect(\semCoeffOpt)
+            \end{equation*} 
+            \begin{equation*}
+            \semCoeffOpt \coloneqq \argmin_{\semCoeffMat \in \semCoeffMatSet_\dagTolerance} \; \E\Big[ \norm{\semNoiseCovariance^{-1/2}  \left(\eye - \semCoeffMat^\T \right)\semVector }^2 \Big] 
+            \end{equation*}
+    }
+    \coloredbox[bgcolor=uulightgrey,fgcolor=black_]{
+        Can one construct a confidence interval $\blueGamma$ for $\averageCausalEffectTarget$, that covers with probability $1-\confidenceLevel$ from $\nData$ data points?
+    }
+}
+
+
+\block[roundedcorners=0, linewidth=1mm, titleleft]{Projection technique, Example in 2D}{
+    \innerblock{}{
+    When $\dNodes=2$, $\semCoeffMat=\begin{bmatrix}0&\semCoeffMat_{1,2}\\\semCoeffMat_{2,1} & 0 \end{bmatrix}$.
+    Almost-DAG matrices fulfils $\hFun(\semCoeffMat)=\dagTolerance$.
+    }
+    \innerblock{}{
+        \centering
+        \resizebox{30cm}{!}{
+        \fontsize{10pt}{12pt}
+        \pgfkeyssetvalue{/figure/width}{10cm}
+        \pgfkeyssetvalue{/figure/height}{5cm}
+        \input{tikz/projected_set.tikz}
+        }
+        \innerblock{}{
+        The almost-dag solution is $\semCoeffEstN$. Its confidence set is given by \textbf{projection onto the constraint} $\hFun(\semCoeffMat)=\dagTolerance$.
+        It induces a corresponding $\mathbf{\blueGamma}$.
+        }
+    }
+}
+
+\block[roundedcorners=0, linewidth=1mm, titleleft]{Confidence interval}{
+    The confidence interval
+    \begin{align*}
+     \blueGamma  = \left\{ \averageCausalEffect \in \R \middle|\frac{1}{\nData} \frac{ (\averageCausalEffect - \averageCausalEffect(\semCoeffEstN))^2}{  \nabla \averageCausalEffect(\semCoeffEstN)^\T\mEstCovarianceN \nabla \averageCausalEffect(\semCoeffEstN))}  \leq \chi^2_{1,\confidenceLevel}  \right\}
+    \end{align*}
+    has asymptotic coverage probability
+    \begin{equation*}
+    \lim_{\nData \rightarrow \infty} \: \Prob ( \averageCausalEffectTarget \in  \blueGamma  ) = 1 - \alpha,
+    \end{equation*}
+    where $\chi^2_{1,\confidenceLevel}$ denotes the $(1-\alpha)$ quantile of the chi-squared distribution with 1 degree of freedom.
+    \label{thm:confidence_set_for_ace}, and $\mEstCovarianceN$ is the information matrix of $\semCoeffEstN$, projected onto the constraints.
+}
+
+% THIRD column - results
+\column{0.3}
+\block[roundedcorners=0, linewidth=1mm, titleleft]{
+    Numerical illustration: bias correction
+    }{
+    \innerblock{}{
+        In one numerical example, data is generated from a linear gaussan structural equation model.
+        Our proposed confidence interval $\blueGamma$ is compared with 
+        $\regCoefficientSet_{\confidenceLevel,\nData}$, the C.I. using OLS with robust standard errors adjusting for both $\adjustmentVar_1$ and $\adjustmentVar_2$.
+    }    
+    \innerblock{}{
+        \centering
+        \tikzset{node distance=4.3cm}
+        \input{tikz/4node_collider_graph.tikz}
+    }
+    \innerblock{}{
+        \centering
+        \resizebox{22cm}{!}{
+            \fontsize{10pt}{12pt}
+            \pgfplotsset{every axis/.append style={xtick distance=.2, ytick distance=.2,width=7cm}}
+            \input{tikz/4node_collider_chart.tikz}
+        }
+    }
+}
+
+\block[roundedcorners=0, linewidth=1mm, titleleft]{LiNGAM comparison}{
+\innerblock{}{
+    In one numerical experiment, we \textbf{compared our confidence intervals with DirectLiNGAM} from \emph{Shimizu et al. JMLR 12 (2011) 1225--1248} with boostrapping.
+    Data was generated with \textbf{random true $\semCoeffMat$} different distributions for $\semNoise$, but with the same mean and covariance.
+    }
+\innerblock{}{
+    Empirical coverage rate (CR) and the average Confidence Interval (CI) width for LiNGAM Bootstrap CI and $\blueGamma$ proposed in this article. The nominal CR was set to exceed $1-\alpha = 95\%$.
+}
+\innerblock{}{
+    \centering
+    \input{data/lingam_table}
+    }
+}
+
+\end{columns}
+\end{document}

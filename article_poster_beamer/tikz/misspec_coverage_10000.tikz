@@ -1,0 +1,19 @@
+\begin{tikzpicture}[baseline]
+        \pgfplotstableread[col sep=comma]{./data/misspec_coverage_10000.csv}\datatable
+    \begin{axis}[%
+        ,xlabel=$\misspecCond$
+        ,ylabel=Empirical Coverage
+        ,yticklabel={\pgfmathparse{\tick*100}\pgfmathprintnumber{\pgfmathresult}\%},
+        ,ymax=1.01
+        ,ymin=0.8
+        ,xmin=1
+        ,xmax=4
+        ]
+
+        \addplot[dashed] table[x=x,y=target]{\datatable};
+        \addplot[const plot mark right, thin, white, name path=A]  table [x=x, y=yUpper]{\datatable};
+        \addplot[const plot mark right, thin, white, name path=B]  table [x=x, y=yLower]{\datatable};
+        \addplot[black!10] fill between[of=A and B];
+        \addplot[const plot mark right,thick]  table [x=x, y=y]{\datatable};
+    \end{axis}
+\end{tikzpicture}  

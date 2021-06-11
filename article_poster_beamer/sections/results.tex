@@ -1,0 +1,215 @@
+
+
+\section{Results} %%%%%%%%%%%%%%%%%%%%%%%%%%
+\label{sec:result}
+
+We present the results in this paper in two parts. First, we present the confidence interval for $\averageCausalEffectTarget$ with an asymptotically valid coverage probability (Theorem~\ref{thm:cofidence_interval_for_ace}). This uses a general result of equality-constrained M-estimation, which we subsequently present (Theorem~\ref{thm:constrained_m_estimation}, Corollary~\ref{cor:constrained_m_est}).
+
+\subsection{Derivation of Confidence Interval}
+
+Using the empirical average operator $\En$, we define the empirical analog of \eqref{eq:def:semcoefftrue} as
+\begin{align}
+    \label{eq:def:Wn}
+    \semCoeffEstN \coloneqq \argmin_{\semCoeffMat \in \semCoeffMatSet_\dagTolerance} \;
+    \En\Big[ \norm{\semNoiseCovariance^{-1/2}  \left(\eye - \semCoeffMat^\T \right)\semVector }^2 \Big]
+\end{align}
+Using $\semCoeffEstN$ and \eqref{eq:def:averageCausalEffectInSem} yields a point estimate of $\averageCausalEffectTarget$:
+\begin{align}
+    \label{eq:def:gamma_n}
+    \averageCausalEffectEstN  \coloneqq \averageCausalEffect(\semCoeffEstN)
+\end{align}
+
+For notational simplicity, we reparameterize $\semCoeffMat$, which contains zeros along the diagonal,
+by $\vecop(\semCoeffMat) = \mEstParametrization \mEstParameter$, where $L$ is a $\dNodes^2  \times \dNodes(\dNodes-1)$ matrix constructed using a $\dNodes^2  \times \dNodes^2$ identity matrix removing columns $d(k-1)+k$ for $k=1,2,\dots, d$. Using this parametrization, we formulate the loss function
+\begin{align}
+    \label{eq:def:mest:loss}
+    \footnotesize{
+        \mEstLoss_\mEstParameter(\semVector) \coloneqq (\mEstParametrization\mEstParameter - \vecop(I))^\T
+        \left[\semNoiseCovariance^{-1} \kronecker  [\semVector\semVector^\T] \right]
+        (\mEstParametrization\mEstParameter - \vecop(I))
+    }
+\end{align}
+using the Kronecker product $\kronecker$, and we write
+\begin{align}
+    \label{eq:def:theta0}
+    \mEstParameterTrue & = \argmin_{
+        h(\matop(\mEstParametrization\mEstParameter)) \leq \dagTolerance }
+    \E[\mEstLoss_{\mEstParameter}(\semVector) ] \\
+    \label{eq:def:thetan}
+    \mEstParameterEstN & = \argmin_{
+        h(\matop(\mEstParametrization\mEstParameter)) \leq \dagTolerance }
+    \En[\mEstLoss_{\mEstParameter}(\semVector) ]
+\end{align}
+equivalently to \eqref{eq:def:semcoefftrue} and $\eqref{eq:def:Wn}$.
+
+%\citet[Corrollary~8]{loh_high-dimensional_2014} show that \eqref{eq:def:theta0} with $\dagTolerance=0$ yields the correct parameter $\mEstParameter$ if the observational distribution indeed comes from the model $ \semVector = \matop(L\theta)\semVector + \semNoise $. Moreover, \citet[Theorem~9]{loh_high-dimensional_2014} proves that the correct parameter is obtained even under limited misspecification of $\cov[\semNoise] = \semNoiseCovariance$. A unknown scaling factor can be included (replace $\semNoiseCovariance$ with $a\cdot\semNoiseCovariance$) and you can also allow some miss-specification of the entries in $\semNoiseCovariance$. We refer to the original paper for details.
+
+While setting $\dagTolerance=0$ yields exact \DAG-matrices, it also renders the problem ill-suited for inference. The set $\semCoeffMatSet_0$ is nonconvex, has  an empty interior, and constraint qualification does not hold (see Lemma~\ref{lemma:nonconvexWset} in the supplementary material). Therefore, convex optimization methods, barrier methods, and any method based on first-order optimality will be invalid. Asymptotic analysis of M-estimation typically requires convexity of the tangent cone at the optimum, and that the optimal point is stationary even under the unconstrained formulation \citep{geyer_asymptotics_1994,shapiro_asymptotics_2000}, but neither of these assumptions are fulfilled at most points in the set $\semCoeffMatSet_0$. To provide a tractable analysis, we consider $\dagTolerance>0$ below and expect almost-identification when $\dagTolerance$ is small. We start with a technical lemma.
+\begin{lemma}
+    \label{lemma:unconstrained_minimization}
+    The minimizer $\mEstParameterTrue$ in \eqref{eq:def:theta0} is bounded. If it is also unique, then there is a value of $\dagToleranceMax$ such that the minimum is obtained at the boundary $\hFun(\matop(\mEstParametrization\mEstParameterTrue)) = \dagTolerance$ for all $\dagTolerance < \dagToleranceMax$.
+\end{lemma}
+\begin{proof}
+    First, assume that the mimimizer of \eqref{eq:def:theta0} is not bounded. In that case, there is a sequence of feasible points $t_n$ such that $\norm{t_n} \to \infty$, and $\E [\mEstLoss_{t_n}(\semVector)] $ is decreasing. This is not possible, since $\mEstLoss_t(\semVector)$ is a positive definite quadratic in $t$. We have established the boundedness $\norm{\mEstParameterTrue} < B$, for some $B$.
+
+    Let $\qMatrix = \semNoiseCovariance^{-1} \kronecker  \E[\semVector\semVector^\T]$, i.e. a Kronecker product of two positive definite matrices and it follows that $\qMatrix$ is positive definite. Then the objective function of \eqref{eq:def:theta0} is a positive definite quadratic with a global minimum given by the stationary point  $ \mEstParameter_\star \eqqcolon (\qMatrix{}^{1/2} L )^\dagger \qMatrix{}^{1/2} \vecop(\eye ) $ where $^\dagger$ denotes the Moore-Penrose inverse.
+    When $\dagTolerance = \infty$, then $\mEstParameter_\star$ is a feasible point to the minimization problem in \eqref{eq:def:theta0}.
+
+    Define $\dagToleranceMax = \hFun( \matop(L\mEstParameter_\star))$ and consider \eqref{eq:def:theta0} for any $\dagTolerance \in (0,\,\dagToleranceMax)$.
+    Observe that $\left\{ \mEstParameter \,\middle|\, \norm{\mEstParameter}\leq B \text{ and } \hFun( \matop(L\mEstParameter)) \leq \dagTolerance \right\}$ is compact, the objective function has no stationary points on the feasible set, and $\norm{\mEstParameterTrue}< B$. Conclude that $h(\matop(\mEstParametrization\mEstParameterTrue)) = \dagTolerance$.
+\end{proof}
+
+\begin{lemma}
+    \label{lemma:asymptotic_normal_mestparam}
+    Assume the solution to \eqref{eq:def:theta0} is unique, and that $\dagTolerance < \dagToleranceMax$ as in Lemma~\ref{lemma:unconstrained_minimization}.
+    Then the asymptotic distribution of $\mEstParameterEstN$ can be described by
+    \begin{align}
+        \label{eq:asymptotics_for_mEstParamEst}
+        \sqrt{\nData}\mEstCovarianceN^{-1/2}(\mEstParameterEstN - \mEstParameterTrue) \convd \normal (0,\eye)
+    \end{align}
+    The estimated covariance of the estimator is defined as $\mEstCovarianceN = \Kn^{-1}\PiN\Jn\PiN\Kn^{-1}$, where
+    $ \Kn = \mEstParametrization^\T   \left[ \semNoiseCovariance^{-1} \kronecker \En \left[  \semVector \semVector^\T \right] \right]\mEstParametrization$, $\PiN$  is a projection matrix with respect to the orthogonal complement of $ \nabla_{\mEstParameter} \hFun(\matop(L\mEstParameterEstN))$
+    and  $\Jn = \mEstParametrization^\T \tilde \Jn \mEstParametrization $.
+
+    We may compute $\PiN = \eye - (qq^\T)/(q^{\T}q)$ and $q = \mEstParametrization^\T\vecop(2\semCoeffEstN \hadamard (\exp [ \semCoeffEstN\hadamard \semCoeffEstN ])^\T)$.
+    Furthermore, the matrix $\tilde \Jn$ has the expression
+    \begin{multline}
+        \label{eq:mest:score_variance}
+        (\tilde \Jn )_{d(j-1)+i,d(l-1)+k} =
+        \sum_{q,r,o,p=1}^{\dNodes} \Big\{
+        \big( \En\left[ \semVector_i \semVector_q \semVector_o \semVector_k \right]- \\
+        \En\left[ \semVector_i \semVector_q \right]\En\left[ \semVector_o \semVector_k \right]\big)
+        \semNoiseCovariance^{-1}_{j,r}
+        \semNoiseCovariance^{-1}_{p,l}
+        (\semCoeffMat-\eye)_{q,r}
+        (\semCoeffMat-\eye)_{o,p}
+        \Big\}
+    \end{multline}
+\end{lemma}
+\begin{proof}
+    By consistency of M-estimation, \eqref{eq:def:thetan} will be a consistent estimator for \eqref{eq:def:theta0}. Adding the redundant $\norm{\mEstParameter} \leq B$-constraint in Lemma~\ref{lemma:unconstrained_minimization} makes the feasible set compact and thus fulfills the technical conditions \citep[Theorem 12.2]{wooldridge_econometric_2010}.
+
+    By Lemma~\ref{lemma:unconstrained_minimization}, we know that the minimum will be obtained at the boundary, in the limit $\nData \to \infty$. We can therefore impose equality constraints in the minimization:
+    \begin{align}
+        \mEstParameterEstN = \argmin_{
+            h(\matop(\mEstParametrization\mEstParameter)) = \dagTolerance }
+        \En[\mEstLoss_{\mEstParameter}(\semVector) ]
+    \end{align}
+    Now apply Corollary~\ref{cor:constrained_m_est} derived below. It states the formula for confidence intervals under equality-constrained M-estimation using plug-in estimators of data covariance and cross-moments. The derivation of the expressions for $\tilde \Jn$, $\Kn$ and $\PiN$ from \eqref{eq:def:mest:loss} are direct computations presented in the supplementary material as Lemma~\ref{lemma:mest:symbols}. Technical conditions are presented in Lemma~\ref{lemma:mest:technicalities}.
+\end{proof}
+
+We can now state our main result for inferring the average causal effect $\averageCausalEffectTarget$.
+\begin{theorem}
+    \label{thm:cofidence_interval_for_ace}
+    The confidence interval
+    \begin{align}
+        \label{eq:confidence_set_for_ace}
+        \averageCausalEffectSet_{\confidenceLevel, \nData}  = \left\{ \averageCausalEffect \in \R \middle|\frac{1}{\nData} \frac{ (\averageCausalEffect - \averageCausalEffectEstN)^2}{  \nabla \averageCausalEffect(\mEstParameterEstN)^\T\mEstCovarianceN \nabla \averageCausalEffect(\mEstParameterEstN))}  \leq \chi^2_{1,\confidenceLevel}  \right\}
+        \quad
+    \end{align}
+    has asymptotic coverage probability
+    \begin{equation}
+        \lim_{\nData \rightarrow \infty} \: \Prob ( \averageCausalEffectTarget \in  \averageCausalEffectSet_{\alpha, \nData}  ) = 1 - \alpha,
+    \end{equation}
+    where $\chi^2_{1,\confidenceLevel}$ denotes the $(1-\alpha)$ quantile of the chi-squared distribution with 1 degree of freedom.
+    \label{thm:confidence_set_for_ace}
+\end{theorem}
+\begin{proof}
+
+    Define $\averageCausalEffect(\mEstParameter)$ as the value of $\averageCausalEffect(\matop(\mEstParametrization \mEstParameter))$ in \eqref{eq:def:averageCausalEffectInSem}.
+
+    The gradient $\nabla \averageCausalEffect(\mEstParameterEstN)$ may be computed on closed form by differentiating \eqref{eq:def:averageCausalEffectInSem}, obtaining
+    \begin{align}
+        \label{eq:gradient_of_ace}
+        \left[ \nabla _\mEstParameter \averageCausalEffect(\mEstParameter) \right]_k = -\left( \left[\semScaleMatrix \mutilatingMatrix \kronecker \eye \right] \mEstParametrization \right)_{d+1,k}
+    \end{align}
+    where $\semScaleMatrix = (\eye-\mutilatingMatrix \semCoeffMat)^{-1}$. The computation is mostly keeping track of indices, and presented in supplementary materials as Lemma~\ref{lemma:gradient_of_ace}.
+    Using the delta method with equation \eqref{eq:gradient_of_ace} together with Lemma~\ref{lemma:asymptotic_normal_mestparam}, we establish asymptotic normality. Form the Wald statistic for $\averageCausalEffectEstN$, and we may finally define a confidence interval $\averageCausalEffectSet_{\alpha, \nData}$.
+\end{proof}
+
+
+\subsection{M-estimation Asymptotics under Equality Constraints}\label{subsection:mestimation_with_constraints}
+
+Next we derive a general result for the asymptotics of of equality-constrained M-estimation. The key observation is borrowed from \citet{stoica_cramer-rao_1998}: that we can project onto the (generalized) score onto the active constraints. We apply this insight to the more general M-estimation framework and derive complete asymptotic distribution of equality-constrained M-estimators.
+
+In this section~\ref{subsection:mestimation_with_constraints} the function $\mEstLoss$ is not necessarily the same function as defined in \eqref{eq:def:mest:loss} but we use the same symbol to ease the mapping between the general result and its application.
+
+\begin{theorem} \label{thm:constrained_m_estimation}
+    Assume that technical conditions for consistency of M-estimation holds \citep[Theorem 12.2]{wooldridge_econometric_2010}), as well as
+    \begin{itemize}
+        \item The loss function $\mEstLoss_\mEstParameter(\semVector)$ is two times continously diffrentiable in $\semVector$.
+        \item $\mEstParameterSet \coloneqq \{ \mEstParameter \in \mathbb R^p \mid \mEstConstrint(\mEstParameter)=0\}$ for some vector-valued constraint function $\mEstConstrint$ such that $\mEstParameterSet $ is bounded.
+        \item The Jacobian matrix $\nabla \mEstConstrint( \mEstParameterEstN)$ has full rank for all $n$.
+        \item $\En \left[ \nabla^2 \mEstLoss_{\mEstParameter}(v)\right]$ is invertible for all $\mEstParameter$.
+        \item $\mEstParameterTrue$ is the unique minimizer of $ \E[\mEstLoss_\mEstParameter(\semVector)]$
+    \end{itemize}
+
+    Introduce  the definitions
+    $\Jtrue \coloneqq \cov[\nabla \mEstLoss_{\mEstParameterTrue}(\semVector)]$,
+    $\Ktrue \coloneqq  \E[ \nabla^2 \mEstLoss_{\mEstParameterTrue}(\semVector)]$ and
+    $\PiTrue$ is an orthogonal projector in the complement of the range of the jacobian $\nabla \mEstConstrint( \mEstParameterTrue)$.
+    Then we can establish the convergence
+    \[\sqrt{n} ( \mEstParameterEstN - \mEstParameterTrue) \convd \normal(0,\Ktrue^{-1}\PiTrue\Jtrue\PiTrue\Ktrue^{-1}).\]
+\end{theorem}
+
+\begin{proof}
+
+    Uniform weak law of large numbers holds, and $\mEstParameterSet$ must be compact since bounded and closed, so we have that $\mEstParameterTrue$ is consistently estimated by $\mEstParameterEstN$
+
+    Let $\Qn$ be a matrix whose orthonormal columns spans the range of $\nablatheta \mEstConstrint( \mEstParameterEstN)$ (as in e.g. QR factorization).
+    Construct an orthogonal matrix $[\Qn \, \Un]$.
+    Now, $\Qn$ is a ON basis for the normal of the feasible set $\mEstParameterSet$, and $\Un$ is a ON basis for the tangent cone of $\mEstParameterSet$ as $\mEstParameterEstN$.
+
+    Begin by a mean-value expansion of $\En \left[ \nablatheta \mEstLoss_{ \mEstParameterEstN}(\semVector)\right]$.
+    \begin{align}
+        \En[ \nablatheta \mEstLoss_{ \mEstParameterEstN}(\semVector)] & = \En[ \nablatheta \mEstLoss_{\mEstParameterTrue}(\semVector)] + \En[ \nablatheta^2  \mEstLoss_{\tilde \mEstParameter}(\semVector)] ( \mEstParameterEstN - \mEstParameterTrue)
+    \end{align}
+    We have that $I=[\Qn\,\Un]\begin{bmatrix}\Qn^\T\ \\ \Un^\T\end{bmatrix}$% = \Qn\Qn^\T + \Un\Un^\T$.
+    \begin{align}
+         & [\Qn\,\Un]\begin{bmatrix}\Qn^\T \\ \Un^\T\end{bmatrix}\En [\nablatheta \mEstLoss_{ \mEstParameterEstN}(\semVector)]                                                                                                                  \\
+         & = [\Qn\,\Un]\begin{bmatrix}\Qn^\T \\ \Un^\T\end{bmatrix}  \En [\nablatheta\mEstLoss_{\mEstParameterTrue}(\semVector)] +  \En [\nablatheta^2\mEstLoss_{\tilde \mEstParameter}(\semVector)] ( \mEstParameterEstN - \mEstParameterTrue)
+    \end{align}
+    By definition $\Un^\T\nablatheta g( \mEstParameterEstN)=0$, and from first order optimality conditions $\nablatheta \mEstLoss_{ \mEstParameterEstN}$ is in the range of $\nablatheta g( \mEstParameterEstN)$, so $\Un^\T\nablatheta \mEstLoss_{ \mEstParameterEstN} =0$.
+
+    Rearranging, and using the assumption of invertibility of $\En [\nablatheta^2 \mEstLoss_{\tilde \mEstParameter}(\semVector)]$, we get
+    \begin{align}
+        \label{eq:mEst:before_any_limit}
+         & ( \mEstParameterEstN - \mEstParameterTrue)=                                                                            \\
+         & \En \left[\nablatheta^2 \mEstLoss_{\tilde \mEstParameter}(\semVector)\right]^{-1} [\Qn\,\Un]\begin{bmatrix}\Qn^\T \left(\En \left[ \nablatheta \mEstLoss_{ \mEstParameterEstN}(\semVector) -  \nablatheta \mEstLoss_{\mEstParameterTrue}(\semVector)\right] \right)  \\  -\Un^\T \En \left[ \nablatheta \mEstLoss_{\mEstParameterTrue}(\semVector)\right] \end{bmatrix}
+    \end{align}
+    Next, we will analyze a certain subexpression separately. Introduce $\PiTrue = \Utrue\Utrue^\T$ and $\PiN = \Un\Un^\T$.
+    \begin{align}
+         & \sqrt{n} \PiN \En \left[ \nablatheta \mEstLoss_{\mEstParameterTrue}(\semVector)\right] =                                                                                                                                                                                       \\
+         & \quad \PiN \sqrt{n} \left( \En \left[ \nablatheta \mEstLoss_{\mEstParameterTrue}(\semVector)\right] - \E \left[ \nablatheta \mEstLoss_{\mEstParameterTrue}(\semVector)\right] \right) + \PiN \sqrt{n}  \E \left[ \nablatheta \mEstLoss_{\mEstParameterTrue}(\semVector)\right]
+    \end{align}
+    The first term converges to $\normal(0,\PiTrue\Jtrue\PiTrue)$ in distribution. The second term converges to zero in probability,  so
+    \begin{align}
+        \sqrt{n} \PiN \En \left[ \nablatheta \mEstLoss_{\mEstParameterTrue}(\semVector)\right] \convd \normal(0,\PiTrue\Jtrue\PiTrue)
+    \end{align}
+    Finally, we can take the limit of equation \eqref{eq:mEst:before_any_limit}.
+    {\footnotesize\begin{multline}
+        \sqrt{n} ( \mEstParameterEstN - \mEstParameterTrue) = \\
+        \sqrt{n}\underbrace{[\En \left[ \nablatheta^2 \mEstLoss_{\tilde \mEstParameter}(\semVector)\right]^{-1}}_{\convp K^{-1}}  \underbrace{\Qn\Qn^\T}_{\convp \Qtrue\Qtrue^\T} \underbrace{\left(\En \left(\nablatheta \mEstLoss_{ \mEstParameterEstN}(\semVector)\right] - \En \left[\nablatheta \mEstLoss_{\mEstParameterTrue}(\semVector)\right] \right)}_{\convp 0} \\
+        -  \underbrace{[\En \left[ \nablatheta^2 \mEstLoss_{\tilde \mEstParameter}(\semVector)\right]^{-1}}_{\convp \Ktrue^{-1}} \underbrace{ \sqrt{n} \PiN \En \left[ \nablatheta \mEstLoss_{\mEstParameterTrue}(\semVector)\right]}_{\convd \normal(0,\PiTrue\Jtrue\PiTrue)}
+    \end{multline}
+    }
+
+    For all terms converging in probability we have been using the uniform weak law of large numbers, so we rely on compactness of $\mEstParameterSet$, and the suitable smoothness of the functions depending on $\semVector$.
+    We need, for example, the continuity of matrix inversion, QR factorization and orthogonal complements. W
+    e use Slutskys theorem to multiply the terms.
+
+    Finally we see $\sqrt{n} ( \mEstParameterEstN - \mEstParameterTrue) \convd \normal(0,\Ktrue^{-1}\PiTrue\Jtrue\PiTrue\Ktrue^{-1})$
+\end{proof}
+
+\begin{corollary} \label{cor:constrained_m_est}
+    The asymptotic distribution of Theorem~\ref{thm:constrained_m_estimation} can be reformulated by standardizing it, and plugging in estimates (e.g. $\Kn$) in the place of the population optimal expressions (e.g. $\Ktrue$).
+    \[\sqrt{n}\mEstCovarianceN^{-1/2} ( \mEstParameterEstN - \mEstParameterTrue) \convd \normal(0,\eye).\]
+    with the introduction of
+    \[ \mEstCovarianceN \coloneqq \Kn^{-1}\PiN\Jn\PiN\Kn^{-1}  \]
+    \[\Kn\coloneqq \En \left[ \nablatheta^2 \mEstLoss_{\mEstParameterEstN} (\semVector)\right]\]
+    \[ \Jn \coloneqq \En[\nabla \mEstLoss_{\mEstParameterEstN}(v)\nabla \mEstLoss_{\mEstParameterEstN}(v)^\T]
+        -\En[\nabla \mEstLoss_{\mEstParameterEstN}(v)]\En[\nabla \mEstLoss_{\mEstParameterEstN}(v)]^\T\]
+\end{corollary}
+\begin{proof}
+    This follows from the consistency of plug-in-estimators \citep[Theorem 12.2]{wooldridge_econometric_2010}.
+\end{proof}

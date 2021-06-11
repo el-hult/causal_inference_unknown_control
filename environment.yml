@@ -1,0 +1,21 @@
+name: causal_effect_ci
+channels:
+  - defaults
+dependencies:
+  - numpy=1.19.2
+  - matplotlib=3.3.2
+  - python=3.8
+  - flake8=3.8.4 # only used for development
+  - black=19.10 # only used for development
+  - scipy=1.5.2
+  - pip=20.3.3
+  - pandas=1.1.1
+  - seaborn=0.11.0
+  - networkx=2.5
+  - statsmodels=0.12.1
+  - jinja2=2.11.3
+  - tqdm=4.56
+  - colorama=0.4.4
+  - pip:
+    - lingam==1.5.1
+    - --editable .

@@ -1,0 +1,89 @@
+\newcommand{\xmin}{1e-15}
+\newcommand{\xmax}{1e2}
+
+\begin{subfigure}[b]{0.4\textwidth}
+%\centering
+\begin{tikzpicture}[baseline]
+    \pgfplotstableread[col sep=comma]{./data/dagtol_pgfplots.csv}{\datatable};
+    \begin{loglogaxis}[
+        width=\textwidth,
+        height=0.7\textwidth,
+        xlabel={$\dagTolerance$},
+        ylabel={$|\hat{\averageCausalEffectTarget}(\dagTolerance)|$},
+        xmin=\xmin,
+        xmax=\xmax
+    ]
+    \foreach \k in {0,1,...,19}
+        \addplot [mark=none,color=black] table [x=dag_tolerance, y=ace_abs-\k] {\datatable};
+    \end{loglogaxis}
+\end{tikzpicture}
+\subcaption{The average causal effect estimated for various $\dagTolerance$. Absolute value imposed to allow log-log-plot.}
+\end{subfigure}
+\hspace{0.1\textwidth}
+%
+%
+%
+%
+\begin{subfigure}[b]{0.4\textwidth}
+\begin{tikzpicture}[baseline]
+    \pgfplotstableread[col sep=comma]{./data/dagtol_pgfplots.csv}{\datatable};
+    \begin{loglogaxis}[
+        width=\textwidth,
+        height=0.7\textwidth,
+        xlabel={$\dagTolerance$},
+        ylabel={$|\averageCausalEffect - \averageCausalEffectNumeric(\dagTolerance)|$},
+        xmin=\xmin,
+        xmax=\xmax
+    ]
+    \foreach \k in {0,1,...,19}
+        \addplot [mark=none,color=black] table [x=dag_tolerance, y=ace_abs_err-\k] {\datatable};
+    \end{loglogaxis}
+\end{tikzpicture}
+\subcaption{The absolute error in the estimate of the causal effect. Smilar to figure \ref{fig:epsilon-limit}.}
+\end{subfigure}
+
+
+\vspace{.1\textwidth}
+%
+%
+%
+\begin{subfigure}[b]{0.4\textwidth}
+\begin{tikzpicture}[baseline]
+    \pgfplotstableread[col sep=comma]{./data/dagtol_pgfplots.csv}{\datatable};
+    \begin{loglogaxis}[
+        width=\textwidth,
+        height=0.7\textwidth,
+        xlabel={$\dagTolerance$},
+        ylabel={$\hFun(\hat{\semCoeffMat}(\dagTolerance))$},
+        xmin=\xmin,
+        xmax=\xmax
+    ]
+    \foreach \k in {0,1,...,19}
+        \addplot [mark=none,color=black] table [x=dag_tolerance, y=h_notears-\k] {\datatable};
+    \end{loglogaxis}
+\end{tikzpicture}
+\subcaption{The constraint function $\hFun$ at the numerical approximation of the $\dagTolerance$-almost \DAG{} $\semCoeffOpt$. If the numerical solver is good and $\dagTolerance \leq \dagToleranceMax$, we should have $\hFun(\hat{\semCoeffMat(\dagTolerance}) \approx \dagTolerance$, which is what we observe down to circa $10^{-12}=\augLagConstraintTol$, the tolerated constraint violation of Algorithm~\ref{algo:augLag}. We can also see that when $\dagTolerance > \dagToleranceMax$, the solution does not depend on $\dagTolerance$.}
+\label{fig:sensitivity_details:hfun}
+\end{subfigure} 
+\hspace{0.1\textwidth}
+%
+%
+%
+%
+\begin{subfigure}[b]{0.4\textwidth}
+\begin{tikzpicture}[baseline]
+    \pgfplotstableread[col sep=comma]{./data/dagtol_pgfplots.csv}{\datatable};
+    \begin{loglogaxis}[
+        width=\textwidth,
+        height=0.7\textwidth,
+        xlabel={$\dagTolerance$},
+        ylabel={$\norm{\semCoeffMat -  \hat{\semCoeffMat}(\dagTolerance) }_{\infty}$},
+        xmin=\xmin,
+        xmax=\xmax
+    ]
+    \foreach \k in {0,1,...,19}
+        \addplot [mark=none,color=black] table [x=dag_tolerance, y=max-metric-\k] {\datatable};
+    \end{loglogaxis}
+\end{tikzpicture}
+\subcaption{The maximum error in the point estimate of the adjacency matrix $\semCoeffMat$. The results indicate $\dagTolerance \to 0$ is a necessary condition to retrieve the true \DAG{}-matrix $\semCoeffMat$, but numerical precision limits this convergence.}
+\end{subfigure}

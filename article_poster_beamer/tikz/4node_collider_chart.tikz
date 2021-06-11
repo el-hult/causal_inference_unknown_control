@@ -1,0 +1,23 @@
+\begin{tikzpicture}[baseline]
+    \pgfplotstableread[col sep=comma]{./data/4node_collider_summary.csv}{\datatable};
+    \begin{semilogxaxis}[
+        xlabel={No. of data points, $\nData$},
+        ylabel={Parameter $\averageCausalEffect$},
+        xmin=90,
+        xmax=11000,
+        legend style={
+            font=\scriptsize, at={(0.5,1.10)},
+            anchor=south,legend columns=-1},
+    ]
+        \addplot+ [ only marks, mark=*, mark size=1pt,
+            error bars/.cd,
+            y dir=both,
+            y explicit] table [x=m_obs, y=ace_value, y error=q_ace_standard_error] {\datatable};
+        \addplot+ [only marks, mark=*, mark size= 1 pt,
+            error bars/.cd,
+            y dir=both,
+            y explicit] table [x=m_obs, y=ols_value, y error=q_ols_standard_error] {\datatable};
+        \addplot [no markers] table [x=m_obs, y=ace_circ] {\datatable};
+        \legend{{$\averageCausalEffectSet_{\confidenceLevel,\nData}$},{$\regCoefficientSet_{\confidenceLevel,\nData}$},{$\averageCausalEffectTarget$}}
+    \end{semilogxaxis}
+\end{tikzpicture}

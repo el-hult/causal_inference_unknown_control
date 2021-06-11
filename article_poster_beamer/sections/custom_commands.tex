@@ -1,0 +1,128 @@
+
+% Qutie general things (not math)
+\newcommand\red[1]{\textcolor{red}{#1}}
+
+% Qutie general things (math)
+\newcommand{\R}{\mathbb R}
+
+%linalg
+\newcommand{\kroneckerDelta}{\delta}
+\DeclarePairedDelimiter\norm{\lVert}{\rVert}
+\DeclareMathOperator*{\vecop}{vec}
+\DeclareMathOperator*{\diag}{diag}
+\DeclareMathOperator*{\matop}{mat}
+\newcommand{\eye}{I}
+\DeclareMathOperator*{\tr}{tr}
+\newcommand{\hadamard}{\circ}
+\newcommand{\kronecker}{\otimes}
+\newcommand{\T}{\top}
+\newcommand{\vecOne}{\mathbf{1}}
+
+% stats and probability
+\DeclareMathOperator*{\cov}{Cov}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\newcommand{\convp}{\overset{p}{\to}}
+\newcommand{\convd}{\overset{d}{\to}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\En}{\mathbb{E}_n}
+\newcommand{\Eint}{\widetilde{\mathbb{E}}}
+\newcommand{\covint}{\widetilde{\text{Cov}}}
+\newcommand{\varint}{\widetilde{\text{Var}}}
+\newcommand{\var}{\text{Var}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\normal}{\mathcal N}
+\newcommand{\permMat}{\mathcal P}
+\newcommand{\unitBasisMatrix}{E}
+
+
+%% Document variables with semantic meaning in this article
+\newcommand{\semCoeffMat}{W}
+\newcommand{\semCoeffColumn}{w}
+\newcommand{\semCoeffMatSet}{\mathcal W}
+\newcommand{\semCoeffOpt}{\semCoeffMat_\circ}
+
+\newcommand{\semCoeffEstN}{\semCoeffMat_\nData}
+\newcommand{\dagPermutationMatrix}{P}
+\newcommand{\semScaleMatrix}{M}
+\newcommand{\semVector}{v}
+\newcommand{\semVectorOrdered}{\omega}
+\newcommand{\semPermutationMatrix}{P}
+\newcommand{\semApproximatorFunction}{f}
+\newcommand{\semNoise}{e}
+\newcommand{\semNoiseCovariance}{\Sigma}
+\newcommand{\semInterventionNoise}{\widetilde \semNoise}
+\newcommand{\semInterventionNoiseCovariance}{\widetilde \semNoiseCovariance}
+\newcommand{\mutilatingMatrix}{Z}
+\newcommand{\cofactorMatrix}{C}
+\newcommand{\dNodes}{d}
+\newcommand{\linearPredictor}{\mathcal L}
+\newcommand{\minorMatrix}{m}
+\newcommand{\averageCausalEffect}{\gamma}
+\newcommand{\averageCausalEffectTarget}{\averageCausalEffect_\circ}
+\newcommand{\averageCausalEffectSet}{\Gamma}
+\newcommand{\averageCausalEffectEstN}{\averageCausalEffect_\nData}
+\newcommand{\averageCausalEffectNumeric}{\hat{\averageCausalEffectTarget}}
+\newcommand{\observationalDistribution}{p}
+\newcommand{\interventionalDistribution}{\tilde p}
+\newcommand{\lossFunc}{\ell}
+\newcommand{\outcomeVar}{y}
+\newcommand{\decisionVar}{x}
+\newcommand{\adjustmentVar}{z}
+\newcommand{\adjusted}[1]{\bar{#1}}
+\newcommand{\validAdjustmentVar}{\adjusted{z}}
+\newcommand{\decisionOptimal}{\hat \decisionVar }
+\newcommand{\decisionTrueOptimal}{\decisionVar ^\star}
+\newcommand{\decisionSpace}{ \mathcal X}
+\newcommand{\dataSet}{\mathcal D}
+\newcommand{\nData}{n}
+\newcommand{\dagTolerance}{\epsilon}
+\newcommand{\dagToleranceMax}{\dagTolerance_\star}
+\newcommand{\mEstParameter}{\theta}
+\newcommand{\mEstParameterEstN}{\mEstParameter_\nData}
+\newcommand{\mEstParameterTrue}{\mEstParameter_\circ}
+\newcommand{\mEstParameterSet}{\Theta}
+\newcommand{\mEstParametrization}{L}
+\newcommand{\mEstLoss}{\ell}
+\newcommand{\mEstConstrint}{g}
+\newcommand{\mEstCovarianceN}{\mathcal J_\nData}
+\newcommand{\regCoefficient}{\beta}
+\newcommand{\regCoefficientSet}{B}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\confidenceLevel}{\alpha}
+\newcommand{\hFun}{h}
+\newcommand{\qMatrix}{\mathsf{Q}}
+
+% helpers for m-estimation proof
+\newcommand{\Un}{U_n}
+\newcommand{\Qn}{Q_n}
+\newcommand{\Qtrue}{Q_\circ}
+\newcommand{\Utrue}{U_\circ}
+\newcommand{\Jn}{J_n}
+\newcommand{\Kn}{K_n}
+\newcommand{\Ktrue}{K_\circ}
+\newcommand{\Jtrue}{J_\circ}
+\newcommand{\nablatheta}{\nabla}
+\newcommand{\PiTrue}{\Pi_\circ}
+\newcommand{\PiN}{\Pi_n}
+
+% helpers for augmented lagrangian method
+\newcommand{\augLagSlack}{s}
+\newcommand{\augLag}{\mathcal L}
+\newcommand{\augLagLagMul}{\alpha}
+\newcommand{\augLagPen}{\rho}
+\newcommand{\augLagPenMul}{\mu}
+\newcommand{\augLagPenMax}{\augLagPen_{max}}
+\newcommand{\augLagIter}{k}
+\newcommand{\augLagMinImprovement}{g}
+\newcommand{\augLagContraint}{c}
+\newcommand{\augLagConstraintTol}{\eta}
+
+% helpers for discussin misspacified error covariance
+\newcommand{\assStruct}{\widehat{\semNoiseCovariance}} % assumed latent covariance structure
+\newcommand{\semNoiseScale}{s}
+\newcommand{\misspecCond}{\kappa\left(\assStruct^{-1}\semNoiseCovariance\right)}
+
+%repeated acroynoms
+\newcommand{\DAG}{\textsc{dag}}
+\newcommand{\scm}{\textsc{scm}}
+\newcommand{\OLS}{\textsc{ols}}
